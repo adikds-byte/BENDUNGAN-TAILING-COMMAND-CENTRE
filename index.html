@@ -372,12 +372,18 @@
             </div>
             <p class="text-[10px] text-slate-400 font-mono flex items-center gap-1.5 mt-0.5">
               <span class="w-2 h-2 rounded-full bg-emerald-400 animate-ping"></span>
-              <span>STANDAR O&amp;P: PERMEN PUPR 27/2015, KEPMEN ESDM 1827/2018, SNI 1726 &amp; GISTM 2020</span>
+              <span id="i18nHeaderSubtitle">STANDAR O&amp;P: PERMEN PUPR 27/2015, KEPMEN ESDM 1827/2018, SNI 1726 &amp; GISTM 2020</span>
             </p>
           </div>
         </div>
 
         <div class="flex lg:hidden items-center gap-1">
+          <button type="button" onclick="toggleAppLanguage()" class="p-2 rounded-lg bg-cyan-950 border border-cyan-600 text-cyan-300 text-xs font-bold" title="Translate / Ganti Bahasa">
+            <i class="fa-solid fa-language text-sm"></i>
+          </button>
+          <button type="button" onclick="adjustTextSize(1)" class="p-2 rounded-lg bg-amber-950 border border-amber-600 text-amber-300 text-xs font-bold" title="Besarkan Teks">
+            <i class="fa-solid fa-text-height text-sm"></i>
+          </button>
           <button type="button" onclick="openTeamModal()" class="p-2 rounded-lg bg-indigo-950 border border-indigo-600 text-indigo-300 text-xs" title="Edit Tim & Penugasan">
             <i class="fa-solid fa-user-pen"></i>
           </button>
@@ -396,8 +402,28 @@
       </div>
 
       <div class="flex flex-wrap items-center gap-1.5 text-xs font-mono">
+        <!-- TOMBOL TRANSLATE BAHASA (ID / EN) -->
+        <button type="button" onclick="toggleAppLanguage()" id="btnAppLang" class="px-2.5 py-1.5 rounded-lg bg-cyan-950/90 hover:bg-cyan-900 text-cyan-200 border border-cyan-500/70 font-bold flex items-center gap-1.5 transition shadow" title="Terjemahkan Bahasa / Switch Language (ID / EN)">
+          <i class="fa-solid fa-language text-base text-cyan-400"></i>
+          <span id="currentLangBadge" class="font-mono text-xs font-black">ID</span>
+        </button>
+
+        <!-- KONTROL BESARKAN TEKS (A- / 100% / A+) -->
+        <div class="inline-flex items-center rounded-lg bg-slate-900 border border-amber-500/60 p-0.5 text-xs font-mono shadow" title="Pengatur Ukuran Teks (Zoom Teks agar Lebih Mudah Terbaca)">
+          <button type="button" onclick="adjustTextSize(-1)" class="px-2 py-1 hover:bg-slate-800 text-slate-300 hover:text-white rounded transition flex items-center gap-0.5" title="Kecilkan Teks (A-)">
+            <span class="text-[11px] font-bold">A</span><i class="fa-solid fa-minus text-[8px]"></i>
+          </button>
+          <button type="button" onclick="resetTextSize()" class="px-2 py-1 hover:bg-slate-800 text-amber-300 font-bold rounded transition flex items-center gap-1" title="Reset Ukuran Teks Normal (100%)">
+            <i class="fa-solid fa-text-height text-amber-400"></i>
+            <span id="textSizeLabel">100%</span>
+          </button>
+          <button type="button" onclick="adjustTextSize(1)" class="px-2 py-1 hover:bg-slate-800 text-slate-300 hover:text-white rounded transition flex items-center gap-0.5" title="Besarkan Teks (A+)">
+            <span class="text-sm font-bold">A</span><i class="fa-solid fa-plus text-[8px]"></i>
+          </button>
+        </div>
+
         <button type="button" onclick="openTeamModal()" class="px-2.5 py-1.5 rounded-lg bg-indigo-900/90 hover:bg-indigo-800 text-indigo-100 border border-indigo-400 font-bold flex items-center gap-1 transition shadow animate-pulse" title="Kelola &amp; Edit Tim Penanggung Jawab serta Penugasan">
-          <i class="fa-solid fa-user-pen text-amber-300"></i> <span class="hidden sm:inline">Tim &amp; Tugas</span>
+          <i class="fa-solid fa-user-pen text-amber-300"></i> <span class="hidden sm:inline" id="lblToolbarTeam">Tim &amp; Tugas</span>
         </button>
         <button type="button" onclick="exportToExcel()" class="px-2.5 py-1.5 rounded-lg bg-emerald-800 hover:bg-emerald-700 text-white font-bold flex items-center gap-1 transition shadow" title="Ekspor Seluruh Dataset ke Excel Multi-Sheet (.xlsx)">
           <i class="fa-solid fa-file-excel"></i> <span class="hidden sm:inline">Excel (.xlsx)</span>
@@ -504,18 +530,18 @@
                 TSF PAD C EXTENSION
               </span>
             </div>
-            <h1 class="text-xl sm:text-2xl lg:text-3xl font-black font-tech tracking-wider text-white">
+            <h1 class="text-xl sm:text-2xl lg:text-3xl font-black font-tech tracking-wider text-white" id="i18nHeroTitle">
               PROSEDUR PEMELIHARAAN BENDUNGAN TAILING
             </h1>
-            <p class="text-xs sm:text-sm text-amber-300/90 font-mono mt-0.5">
+            <p class="text-xs sm:text-sm text-amber-300/90 font-mono mt-0.5" id="i18nHeroSubtitle">
               Alur Kerja, Analisis, dan Saran Teknis untuk Keamanan Berkelanjutan Sesuai Kaidah Pertambangan yang Baik
             </p>
           </div>
 
           <div class="flex items-center gap-3">
             <div class="px-3.5 py-2 rounded-xl bg-slate-900/90 border border-emerald-500/50 text-right">
-              <span class="text-[9px] text-slate-400 font-mono block">STATUS OPERASIONAL TSF</span>
-              <span class="text-sm font-bold text-emerald-400 font-tech flex items-center gap-1.5 justify-end">
+              <span class="text-[9px] text-slate-400 font-mono block" id="i18nOpStatusLabel">STATUS OPERASIONAL TSF</span>
+              <span class="text-sm font-bold text-emerald-400 font-tech flex items-center gap-1.5 justify-end" id="i18nOpStatusValue">
                 <span class="w-2 h-2 rounded-full bg-emerald-400 animate-ping"></span> KONDISI NORMAL (HIJAU)
               </span>
             </div>
@@ -528,7 +554,7 @@
           <!-- KOLOM KIRI: WORKFLOW PEMELIHARAAN (01 - 04) -->
           <div class="lg:col-span-4 space-y-3 font-mono">
             <div class="flex items-center justify-between border-b border-amber-500/40 pb-1.5">
-              <h3 class="text-sm font-black font-tech text-amber-400 tracking-wider flex items-center gap-2">
+              <h3 class="text-sm font-black font-tech text-amber-400 tracking-wider flex items-center gap-2" id="i18nWfTitle">
                 <i class="fa-solid fa-list-check text-amber-400"></i> WORKFLOW PEMELIHARAAN
               </h3>
               <span class="text-[10px] text-slate-400">SOP Harian &amp; Mingguan</span>
@@ -653,7 +679,7 @@
             <!-- ANALISIS & EVALUASI (3 KOTAK SESUAI GAMBAR) -->
             <div class="space-y-2">
               <div class="flex items-center justify-between border-b border-cyan-500/40 pb-1">
-                <h3 class="text-xs font-black font-tech text-cyan-400 tracking-wider flex items-center gap-1.5">
+                <h3 class="text-xs font-black font-tech text-cyan-400 tracking-wider flex items-center gap-1.5" id="i18nGeotechTitle">
                   <i class="fa-solid fa-chart-pie text-cyan-400"></i> ANALISIS &amp; EVALUASI GEOTEKNIK
                 </h3>
                 <span class="text-[9px] text-slate-400">Review Berkala Tim Ahli / EoR</span>
@@ -705,7 +731,7 @@
           <!-- KOLOM KANAN: SARAN TEKNIS & PREVENTIF (3 POIN SESUAI GAMBAR) -->
           <div class="lg:col-span-3 space-y-3 font-mono">
             <div class="flex items-center justify-between border-emerald-500/40 pb-1.5 border-b">
-              <h3 class="text-sm font-black font-tech text-emerald-400 tracking-wider flex items-center gap-2">
+              <h3 class="text-sm font-black font-tech text-emerald-400 tracking-wider flex items-center gap-2" id="i18nTechAdviceTitle">
                 <i class="fa-solid fa-lightbulb text-emerald-400"></i> SARAN TEKNIS &amp; PREVENTIF
               </h3>
               <span class="text-[10px] text-slate-400">Keamanan Berkelanjutan</span>
@@ -3608,6 +3634,174 @@
   <!-- TOAST NOTIFICATION CONTAINER -->
   <div id="toastContainer" class="fixed top-16 right-4 z-[9999] space-y-2 pointer-events-none no-print"></div>
 <script>
+  
+  // ==================== LANGUAGE TRANSLATION (I18N) & TEXT ZOOM ENGINES ====================
+  let currentAppLang = 'id';
+  const TEXT_ZOOM_LEVELS = [85, 90, 95, 100, 110, 120, 130, 140, 150];
+  let currentTextZoomIndex = 3; // 100% default
+
+  const I18N_DICTIONARY = {
+    id: {
+      headerSubtitle: "STANDAR O&P: PERMEN PUPR 27/2015, KEPMEN ESDM 1827/2018, SNI 1726 & GISTM 2020",
+      toolbarTeam: "Tim & Tugas",
+      heroTitle: "PROSEDUR PEMELIHARAAN BENDUNGAN TAILING",
+      heroSubtitle: "Alur Kerja, Analisis, dan Saran Teknis untuk Keamanan Berkelanjutan Sesuai Kaidah Pertambangan yang Baik",
+      opStatusLabel: "STATUS OPERASIONAL TSF",
+      opStatusValue: '<span class="w-2 h-2 rounded-full bg-emerald-400 animate-ping"></span> KONDISI NORMAL (HIJAU)',
+      wfTitle: '<i class="fa-solid fa-list-check text-amber-400"></i> WORKFLOW PEMELIHARAAN',
+      geotechTitle: '<i class="fa-solid fa-chart-pie text-cyan-400"></i> ANALISIS & EVALUASI GEOTEKNIK',
+      techAdviceTitle: '<i class="fa-solid fa-lightbulb text-emerald-400"></i> SARAN TEKNIS & PREVENTIF',
+      // Tabs
+      tab1: '<i class="fa-solid fa-cubes text-amber-400"></i> 01. Infografis',
+      tab2: '<i class="fa-solid fa-sitemap text-rose-400"></i> 02. Alur Komando (RTD)',
+      tab3: '<i class="fa-solid fa-scale-balanced text-cyan-400"></i> 03. Regulasi',
+      tab4: '<i class="fa-solid fa-calendar-days text-emerald-400"></i> 04. Jadwal O&P',
+      tab5: '<i class="fa-solid fa-clipboard-check text-purple-400"></i> 05. Checklist O&P',
+      tab6: '<i class="fa-solid fa-chart-line text-yellow-400"></i> 06. Analisis Kestabilan',
+      tab7: '<i class="fa-solid fa-cloud-sun-rain text-amber-400"></i> 07. Cuaca Windy',
+      tab8: '<i class="fa-solid fa-mountain-sun text-sky-400"></i> 08. Hidroklimatologi & DAS',
+      tab9: '<i class="fa-solid fa-chart-area text-indigo-400"></i> 09. Hujan Rencana GEV & PMP',
+      tab10: '<i class="fa-solid fa-water text-blue-400"></i> 10. Debit Banjir',
+      tab11: '<i class="fa-solid fa-layer-group text-teal-400"></i> 11. QA/QC Timbunan & HDPE',
+      tab12: '<i class="fa-solid fa-earth-asia text-rose-400"></i> 12. Seismik PuSGeN',
+      tab13: '<i class="fa-solid fa-map-location-dot text-rose-400"></i> 13. Peta Spasial GIS',
+      tab14: '<i class="fa-solid fa-file-signature text-amber-300"></i> 14. Berita Acara & Tim',
+      tab15: '<i class="fa-solid fa-robot text-emerald-400"></i> 15. AI Dam Assistant'
+    },
+    en: {
+      headerSubtitle: "O&M STANDARDS: PUPR REG 27/2015, ESDM DECREE 1827/2018, SNI 1726 & GISTM 2020",
+      toolbarTeam: "Team & Tasks",
+      heroTitle: "TAILINGS DAM MAINTENANCE PROCEDURES",
+      heroSubtitle: "Workflows, Numerical Analysis, and Technical Advice for Sustainable Safety in Line with Good Mining Practice",
+      opStatusLabel: "TSF OPERATIONAL STATUS",
+      opStatusValue: '<span class="w-2 h-2 rounded-full bg-emerald-400 animate-ping"></span> NORMAL CONDITION (GREEN)',
+      wfTitle: '<i class="fa-solid fa-list-check text-amber-400"></i> MAINTENANCE WORKFLOW',
+      geotechTitle: '<i class="fa-solid fa-chart-pie text-cyan-400"></i> GEOTECHNICAL ANALYSIS & EVALUATION',
+      techAdviceTitle: '<i class="fa-solid fa-lightbulb text-emerald-400"></i> TECHNICAL ADVICE & PREVENTIVE MEASURES',
+      // Tabs
+      tab1: '<i class="fa-solid fa-cubes text-amber-400"></i> 01. Infographics',
+      tab2: '<i class="fa-solid fa-sitemap text-rose-400"></i> 02. Incident Command (ERP)',
+      tab3: '<i class="fa-solid fa-scale-balanced text-cyan-400"></i> 03. Regulations',
+      tab4: '<i class="fa-solid fa-calendar-days text-emerald-400"></i> 04. O&M Schedule',
+      tab5: '<i class="fa-solid fa-clipboard-check text-purple-400"></i> 05. O&M Checklist',
+      tab6: '<i class="fa-solid fa-chart-line text-yellow-400"></i> 06. Stability Analysis',
+      tab7: '<i class="fa-solid fa-cloud-sun-rain text-amber-400"></i> 07. Windy Weather',
+      tab8: '<i class="fa-solid fa-mountain-sun text-sky-400"></i> 08. Hydroclimatology & Basin',
+      tab9: '<i class="fa-solid fa-chart-area text-indigo-400"></i> 09. Design Rainfall GEV & PMP',
+      tab10: '<i class="fa-solid fa-water text-blue-400"></i> 10. Flood Discharge',
+      tab11: '<i class="fa-solid fa-layer-group text-teal-400"></i> 11. QA/QC Embankment & HDPE',
+      tab12: '<i class="fa-solid fa-earth-asia text-rose-400"></i> 12. Seismic PuSGeN 2024',
+      tab13: '<i class="fa-solid fa-map-location-dot text-rose-400"></i> 13. GIS Spatial Map',
+      tab14: '<i class="fa-solid fa-file-signature text-amber-300"></i> 14. Official Report & Team',
+      tab15: '<i class="fa-solid fa-robot text-emerald-400"></i> 15. AI Dam Assistant'
+    }
+  };
+
+  function applyLanguage(lang, showToastMsg = true) {
+    currentAppLang = lang;
+    try { localStorage.setItem('bsi_dam_lang', lang); } catch(e) {}
+
+    const badge = document.getElementById('currentLangBadge');
+    if (badge) badge.innerText = lang.toUpperCase();
+
+    const d = I18N_DICTIONARY[lang] || I18N_DICTIONARY.id;
+
+    if (document.getElementById('i18nHeaderSubtitle')) document.getElementById('i18nHeaderSubtitle').innerText = d.headerSubtitle;
+    if (document.getElementById('lblToolbarTeam')) document.getElementById('lblToolbarTeam').innerText = d.toolbarTeam;
+    if (document.getElementById('i18nHeroTitle')) document.getElementById('i18nHeroTitle').innerText = d.heroTitle;
+    if (document.getElementById('i18nHeroSubtitle')) document.getElementById('i18nHeroSubtitle').innerText = d.heroSubtitle;
+    if (document.getElementById('i18nOpStatusLabel')) document.getElementById('i18nOpStatusLabel').innerText = d.opStatusLabel;
+    if (document.getElementById('i18nOpStatusValue')) document.getElementById('i18nOpStatusValue').innerHTML = d.opStatusValue;
+    if (document.getElementById('i18nWfTitle')) document.getElementById('i18nWfTitle').innerHTML = d.wfTitle;
+    if (document.getElementById('i18nGeotechTitle')) document.getElementById('i18nGeotechTitle').innerHTML = d.geotechTitle;
+    if (document.getElementById('i18nTechAdviceTitle')) document.getElementById('i18nTechAdviceTitle').innerHTML = d.techAdviceTitle;
+
+    // Update Tabs
+    const tabMap = {
+      btnTabInfografis: d.tab1, btnTabKomando: d.tab2, btnTabRegulasi: d.tab3,
+      btnTabSchedule: d.tab4, btnTabMonitoring: d.tab5, btnTabAnalisis: d.tab6,
+      btnTabWeather: d.tab7, btnTabClimate: d.tab8, btnTabGev: d.tab9,
+      btnTabFlood: d.tab10, btnTabQaqc: d.tab11, btnTabSeismic: d.tab12,
+      btnTabMap: d.tab13, btnTabReport: d.tab14, btnTabChatbot: d.tab15
+    };
+
+    for (const [id, val] of Object.entries(tabMap)) {
+      const el = document.getElementById(id);
+      if (el) el.innerHTML = val;
+    }
+
+    if (showToastMsg) {
+      showToast(lang === 'en' ? 'Language switched to English' : 'Bahasa berhasil diubah ke Bahasa Indonesia', 'success');
+    }
+  }
+
+  function toggleAppLanguage() {
+    const nextLang = currentAppLang === 'id' ? 'en' : 'id';
+    applyLanguage(nextLang, true);
+  }
+
+  function initAppLanguage() {
+    try {
+      const savedLang = localStorage.getItem('bsi_dam_lang');
+      if (savedLang && (savedLang === 'id' || savedLang === 'en')) {
+        applyLanguage(savedLang, false);
+        return;
+      }
+    } catch(e) {}
+    applyLanguage('id', false);
+  }
+
+  // --- TEXT ZOOM / BESARKAN TEKS ENGINE ---
+  function applyTextZoom(index, showToastMsg = true) {
+    if (index < 0) index = 0;
+    if (index >= TEXT_ZOOM_LEVELS.length) index = TEXT_ZOOM_LEVELS.length - 1;
+    currentTextZoomIndex = index;
+    const pct = TEXT_ZOOM_LEVELS[currentTextZoomIndex];
+
+    // Apply zoom to document body & html font size for max compatibility
+    document.body.style.zoom = (pct / 100);
+    document.documentElement.style.fontSize = (pct) + '%';
+
+    const lbl = document.getElementById('textSizeLabel');
+    if (lbl) lbl.innerText = pct + '%';
+
+    try {
+      localStorage.setItem('bsi_dam_text_zoom_idx', currentTextZoomIndex);
+    } catch(e) {}
+
+    // Invalidate leaflet maps if zoomed
+    setTimeout(() => {
+      if (typeof dashMapInstance !== 'undefined' && dashMapInstance) dashMapInstance.invalidateSize();
+      if (typeof mapInstance !== 'undefined' && mapInstance) mapInstance.invalidateSize();
+    }, 200);
+
+    if (showToastMsg) {
+      showToast(currentAppLang === 'en' ? `Text Size: ${pct}%` : `Ukuran Teks: ${pct}%`, 'info');
+    }
+  }
+
+  function adjustTextSize(dir) {
+    applyTextZoom(currentTextZoomIndex + dir, true);
+  }
+
+  function resetTextSize() {
+    applyTextZoom(3, true); // Index 3 is 100%
+  }
+
+  function initTextZoom() {
+    try {
+      const savedIdx = localStorage.getItem('bsi_dam_text_zoom_idx');
+      if (savedIdx !== null) {
+        const idx = parseInt(savedIdx, 10);
+        if (!isNaN(idx) && idx >= 0 && idx < TEXT_ZOOM_LEVELS.length) {
+          applyTextZoom(idx, false);
+          return;
+        }
+      }
+    } catch(e) {}
+    applyTextZoom(3, false);
+  }
+
   // ==================== 1. TIM PENANGGUNG JAWAB & PENUGASAN (EDITABLE DYNAMIC DATA) ====================
   const TEAM_STORAGE_KEY = 'bsi_dam_team_v1';
 
@@ -6579,6 +6773,8 @@
     try { loadTeamData(); renderTeamAll(); } catch(e) {}
     try { qaqcLogData = qaqcLoad(); renderQaqcLog(); } catch(e) {}
     try { runSeismicCalc(true); } catch(e) {}
+    try { initAppLanguage(); } catch(e) {}
+    try { initTextZoom(); } catch(e) {}
   });
 </script>
 </body>
