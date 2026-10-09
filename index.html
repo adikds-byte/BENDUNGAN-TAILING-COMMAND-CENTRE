@@ -60,6 +60,8 @@
 
   <!-- Three.js CDN -->
   <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/three@0.128.0/examples/js/controls/OrbitControls.js"></script>
+
 
   <style>
     :root {
@@ -176,7 +178,40 @@
       }
       .no-print { display: none !important; }
     }
-  </style>
+  
+    /* 3D DAM 1 STABILITY & SEEPAGE STYLES */
+    #dam13DContainer canvas { display: block !important; width: 100% !important; height: 100% !important; border-radius: 0.75rem; cursor: grab; }
+    #dam13DContainer canvas:active { cursor: grabbing; }
+
+    .btn-toggle-active-dam1 {
+        background-color: rgba(6, 182, 212, 0.3) !important;
+        border-color: #06b6d4 !important;
+        color: #22d3ee !important;
+        box-shadow: 0 0 12px rgba(6, 182, 212, 0.5);
+    }
+    .btn-dpad-dam1 {
+        background: rgba(15, 23, 42, 0.9);
+        border: 1px solid rgba(6, 182, 212, 0.45);
+        color: #e2e8f0;
+        width: 28px;
+        height: 28px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        border-radius: 6px;
+        cursor: pointer;
+        transition: all 0.15s ease;
+    }
+    .btn-dpad-dam1:hover {
+        background: rgba(6, 182, 212, 0.45);
+        border-color: #22d3ee;
+        color: #ffffff;
+        transform: scale(1.08);
+    }
+    .btn-dpad-dam1:active {
+        transform: scale(0.92);
+    }
+</style>
 
   <style>
     /* ========== STYLES FOR TAB 14: PETA SPASIAL KHUSUS & REKAYASA GIS PRO ========== */
@@ -648,6 +683,10 @@
       <button onclick="switchTab('tabChatbot')" id="btnTabChatbot" class="tab-btn px-3 py-1.5 rounded-lg text-xs font-mono font-bold border border-slate-700 text-slate-300 hover:text-white transition flex items-center gap-1.5">
         <i class="fa-solid fa-robot text-emerald-400"></i> 16. AI Dam Assistant
       </button>
+      <button onclick="switchTab('tabDam1Stabilitas')" id="btnTabDam1Stabilitas" class="tab-btn px-3 py-1.5 rounded-lg text-xs font-mono font-bold border border-cyan-500/80 text-cyan-300 hover:text-white hover:bg-cyan-950/80 transition flex items-center gap-1.5 bg-gradient-to-r from-cyan-950/80 via-slate-900 to-blue-950/60 shadow-lg shadow-cyan-500/10">
+        <i class="fa-solid fa-mountain text-cyan-400"></i> 17. Stabilitas 3D &amp; Rembesan Dam 1
+      </button>
+
     </div>
   </nav>
   <!-- MAIN TAB CONTENT CONTAINER -->
@@ -5131,6 +5170,614 @@
       </div>
     </section>
 
+    <!-- ==================== TAB 17: ANALISIS STABILITAS LERENG & PEMODELAN 3D BENDUNGAN 1 TUJUH BUKIT (NEW) ==================== -->
+    <section id="tabDam1Stabilitas" class="tab-pane hidden space-y-4 font-mono">
+
+      <!-- BANNER & TOOLBAR UTAMA ANALISIS STABILITAS BENDUNGAN 1 -->
+      <div class="cmd-card p-4 sm:p-5 flex flex-col lg:flex-row justify-between items-start lg:items-center gap-3 border-2 border-cyan-500/60 bg-gradient-to-r from-[#041126] via-[#091b3a] to-[#030917] shadow-2xl relative overflow-hidden">
+        <div class="absolute -right-20 -top-20 w-72 h-72 rounded-full bg-cyan-500/10 blur-3xl pointer-events-none"></div>
+        <div class="absolute -left-20 -bottom-20 w-72 h-72 rounded-full bg-amber-500/10 blur-3xl pointer-events-none"></div>
+
+        <div class="relative z-10 flex items-start sm:items-center gap-3">
+          <div class="w-12 h-12 rounded-2xl bg-gradient-to-tr from-cyan-600 via-blue-600 to-indigo-500 flex items-center justify-center text-white text-2xl font-black shadow-lg shadow-cyan-500/30 shrink-0">
+            <i class="fa-solid fa-mountain"></i>
+          </div>
+          <div>
+            <div class="flex items-center gap-2 flex-wrap mb-0.5">
+              <span class="px-2 py-0.5 rounded bg-cyan-950 text-cyan-300 border border-cyan-500 text-[10px] font-bold">
+                <i class="fa-solid fa-gem mr-1"></i> BENDUNGAN 1 TUJUH BUKIT • BANYUWANGI
+              </span>
+              <span class="px-2 py-0.5 rounded bg-amber-950 text-amber-300 border border-amber-600 text-[10px] font-bold">
+                GEOSTUDIO SLOPE/W &amp; SEEP/W
+              </span>
+              <span class="px-2 py-0.5 rounded bg-emerald-950 text-emerald-300 border border-emerald-500 text-[10px] font-bold">
+                METODE SPENCER &amp; MAKDISI-SEED
+              </span>
+            </div>
+            <h2 class="text-base sm:text-lg font-black tracking-wider text-white font-tech">
+              ANALISIS STABILITAS LERENG &amp; PEMODELAN 3D BENDUNGAN 1 TUJUH BUKIT
+            </h2>
+            <p class="text-[10px] text-slate-400 font-mono">
+              Evaluasi Stabilitas Lereng Statik, Pseudostatik OBE (0.19g) &amp; MDE (0.52g), Deformasi Makdisi-Seed, Tekanan Uplift &amp; Erosi Buluh Sesuai Jurnal Terapan PT BSI
+            </p>
+          </div>
+        </div>
+
+        <!-- TOMBOL KONTROL & EKSPOR -->
+        <div class="relative z-10 flex flex-wrap items-center gap-1.5 text-xs font-mono">
+          <button type="button" onclick="exportDam1StabilityPDF()" class="px-3 py-1.5 rounded-xl bg-rose-700 hover:bg-rose-600 text-white font-bold transition shadow flex items-center gap-1.5">
+            <i class="fa-solid fa-file-pdf"></i> <span class="hidden sm:inline">Cetak PDF</span>
+          </button>
+          <button type="button" onclick="exportDam1StabilityWord()" class="px-3 py-1.5 rounded-xl bg-blue-700 hover:bg-blue-600 text-white font-bold transition shadow flex items-center gap-1.5">
+            <i class="fa-solid fa-file-word"></i> <span class="hidden sm:inline">Word (.doc)</span>
+          </button>
+          <button type="button" onclick="exportDam1StabilityExcel()" class="px-3 py-1.5 rounded-xl bg-emerald-800 hover:bg-emerald-700 text-white font-bold transition shadow flex items-center gap-1.5">
+            <i class="fa-solid fa-file-excel"></i> <span class="hidden sm:inline">Excel (.xlsx)</span>
+          </button>
+          <button type="button" onclick="speakDam1StabilitySummary()" class="px-2.5 py-1.5 rounded-xl bg-slate-800 hover:bg-slate-700 text-amber-300 border border-amber-500/50 font-bold transition flex items-center gap-1" title="Putar Ringkasan Narasi Suara Geoteknik">
+            <i class="fa-solid fa-volume-high text-amber-400"></i>
+          </button>
+        </div>
+      </div>
+
+      <!-- 6 KPI UTAMA EVALUASI STABILITAS BENDUNGAN 1 -->
+      <div class="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-6 gap-2.5 font-mono">
+        <div class="cmd-card p-3 border-l-4 border-l-emerald-500 space-y-1">
+          <span class="text-[9px] text-slate-400 font-bold uppercase block">Statik Steady State Hulu</span>
+          <div class="text-xl font-tech font-bold text-emerald-400" id="dam1KpiStatikHulu">4.210</div>
+          <span class="text-[9px] text-emerald-300 block">Syarat: SF &gt; 1.50 (AMAN)</span>
+        </div>
+        <div class="cmd-card p-3 border-l-4 border-l-emerald-500 space-y-1">
+          <span class="text-[9px] text-slate-400 font-bold uppercase block">Statik Steady State Hilir</span>
+          <div class="text-xl font-tech font-bold text-emerald-400" id="dam1KpiStatikHilir">1.959</div>
+          <span class="text-[9px] text-emerald-300 block">Syarat: SF &gt; 1.50 (AMAN)</span>
+        </div>
+        <div class="cmd-card p-3 border-l-4 border-l-cyan-500 space-y-1">
+          <span class="text-[9px] text-slate-400 font-bold uppercase block">Gempa OBE (PGA 0.19g)</span>
+          <div class="text-xl font-tech font-bold text-cyan-300" id="dam1KpiObe">1.239 &ndash; 3.308</div>
+          <span class="text-[9px] text-cyan-300 block">Syarat: SF &gt; 1.20 (AMAN)</span>
+        </div>
+        <div class="cmd-card p-3 border-l-4 border-l-amber-500 space-y-1">
+          <span class="text-[9px] text-slate-400 font-bold uppercase block">Gempa MDE (PGA 0.52g)</span>
+          <div class="text-xl font-tech font-bold text-amber-400" id="dam1KpiMde">0.889 &ndash; 1.971</div>
+          <span class="text-[9px] text-amber-300 block">Hilir Y/h=1.00 Cek Deformasi</span>
+        </div>
+        <div class="cmd-card p-3 border-l-4 border-l-purple-500 space-y-1">
+          <span class="text-[9px] text-slate-400 font-bold uppercase block">Deformasi Makdisi-Seed</span>
+          <div class="text-xl font-tech font-bold text-purple-300" id="dam1KpiDeform">5.0 <span class="text-xs">cm</span></div>
+          <span class="text-[9px] text-purple-300 block">Izin &lt; 200 cm (50% Jagaan)</span>
+        </div>
+        <div class="cmd-card p-3 border-l-4 border-l-blue-500 space-y-1">
+          <span class="text-[9px] text-slate-400 font-bold uppercase block">Keamanan Rembesan</span>
+          <div class="text-lg font-tech font-bold text-emerald-400 flex items-center gap-1 mt-1">
+            <i class="fa-solid fa-shield-check"></i> AMAN
+          </div>
+          <span class="text-[9px] text-slate-400 block">Uplift 1.55 &bull; Piping 4.23 &amp; 3.07</span>
+        </div>
+      </div>
+
+      <!-- MAIN 3D SIMULATOR & PARAMETER STUDIO (3 COLUMNS) -->
+      <div class="cmd-card p-4 sm:p-5 rounded-2xl border-2 border-cyan-500/80 shadow-2xl glass-panel flex flex-col h-auto lg:h-[760px]">
+        
+        <!-- TOOLBAR KONTROL ATAS KANVAS 3D -->
+        <div class="flex flex-wrap justify-between items-center border-b border-slate-800 pb-3 mb-3 gap-2 flex-shrink-0">
+          <div class="flex items-center gap-2">
+            <h3 class="font-tech text-xs sm:text-sm font-black uppercase text-cyan-400 flex items-center gap-2">
+              <i class="fa-solid fa-cube text-amber-400"></i> Model 3D Bendungan 1 Tujuh Bukit &bull; Simulasi Dinamis Stabilitas &amp; Rembesan
+            </h3>
+          </div>
+
+          <div class="flex flex-wrap items-center gap-2">
+            <!-- MODE DRAG TOGGLE -->
+            <div class="flex gap-1 bg-slate-900/90 p-1 rounded-lg border border-slate-800">
+              <button type="button" id="btnDam1ModeRotate" onclick="setDam1ControlMode('rotate')" class="px-2.5 py-1 rounded text-[10px] font-mono font-bold cursor-pointer btn-toggle-active-dam1 transition-all" title="Mode Putar Bebas 360°">
+                <i class="fa-solid fa-arrows-spin mr-1"></i> <span>PUTAR</span>
+              </button>
+              <button type="button" id="btnDam1ModePan" onclick="setDam1ControlMode('pan')" class="px-2.5 py-1 rounded text-[10px] font-mono font-bold cursor-pointer bg-slate-900 border border-slate-700 text-slate-300 hover:border-cyan-400 transition-all" title="Mode Drag Geser (Pan Bebas Tanpa Terkunci)">
+                <i class="fa-solid fa-hand mr-1"></i> <span>GESER (PAN)</span>
+              </button>
+            </div>
+
+            <!-- PRESETS VIEW CAMERA -->
+            <div class="flex gap-1 bg-slate-900/90 p-1 rounded-lg border border-slate-800">
+              <button type="button" id="btnDam1ViewIso" onclick="setDam1View('iso')" class="px-2.5 py-1 bg-cyan-950/80 border border-cyan-500 rounded text-[10px] font-mono text-cyan-300 font-bold cursor-pointer transition-colors shadow" title="Isometrik 3D">ISO</button>
+              <button type="button" id="btnDam1ViewSide" onclick="setDam1View('side')" class="px-2.5 py-1 bg-slate-900 border border-slate-700 hover:border-cyan-400 rounded text-[10px] font-mono text-slate-400 font-bold cursor-pointer transition-colors" title="Tampak Samping (Potongan Melintang 2D Cross Section)">SIDE (2D)</button>
+              <button type="button" id="btnDam1ViewFront" onclick="setDam1View('front')" class="px-2.5 py-1 bg-slate-900 border border-slate-700 hover:border-cyan-400 rounded text-[10px] font-mono text-slate-400 font-bold cursor-pointer transition-colors" title="Tampak Depan (Hulu/Hilir)">FRONT</button>
+              <button type="button" id="btnDam1ViewTop" onclick="setDam1View('top')" class="px-2.5 py-1 bg-slate-900 border border-slate-700 hover:border-cyan-400 rounded text-[10px] font-mono text-slate-400 font-bold cursor-pointer transition-colors" title="Tampak Atas (Denah)">TOP</button>
+              <button type="button" onclick="resetDam13DView()" class="px-2 py-1 bg-slate-800 hover:bg-cyan-900 border border-slate-600 rounded text-[10px] font-mono text-cyan-300 font-bold cursor-pointer" title="Reset View"><i class="fa-solid fa-arrows-rotate"></i></button>
+            </div>
+
+            <!-- TOGGLES -->
+            <div class="flex gap-1 bg-slate-900/90 p-1 rounded-lg border border-slate-800">
+              <button type="button" id="btnDam1ToggleSlip" onclick="toggleDam1SlipCircle()" class="px-2.5 py-1 rounded text-[10px] font-mono font-bold cursor-pointer btn-toggle-active-dam1 transition-all" title="Tampilkan Bidang Gelincir Kritis Spencer">
+                <i class="fa-solid fa-circle-notch mr-1"></i> <span id="lblDam1SlipToggle">SLIP ARC: ON</span>
+              </button>
+              <button type="button" id="btnDam1ToggleSeep" onclick="toggleDam1Seepage()" class="px-2.5 py-1 rounded text-[10px] font-mono font-bold cursor-pointer btn-toggle-active-dam1 transition-all" title="Animasi Partikel Rembesan Flow Net">
+                <i class="fa-solid fa-water mr-1"></i> <span id="lblDam1SeepToggle">REMBESAN: PLAY</span>
+              </button>
+              <button type="button" id="btnDam1ToggleDim" onclick="toggleDam1Dimensions()" class="px-2.5 py-1 rounded text-[10px] font-mono font-bold cursor-pointer btn-toggle-active-dam1 transition-all" title="Label & Garis Ukur Dimensi">
+                <i class="fa-solid fa-ruler-combined mr-1"></i> <span id="lblDam1DimToggle">DIMENSI: ON</span>
+              </button>
+            </div>
+          </div>
+        </div>
+
+        <!-- 3 COLUMNS GRID -->
+        <div class="grid grid-cols-1 lg:grid-cols-12 gap-4 flex-grow overflow-hidden">
+          
+          <!-- KOLOM KIRI (3 COLS): KONTROL PARAMETER & SKENARIO JURNAL -->
+          <div class="lg:col-span-3 flex flex-col gap-2.5 bg-slate-950/90 p-3.5 rounded-xl border border-slate-800 overflow-y-auto">
+            <div class="flex items-center justify-between border-b border-slate-700 pb-1.5">
+              <h4 class="text-xs font-tech text-cyan-400 font-bold flex items-center gap-1.5">
+                <i class="fa-solid fa-sliders text-cyan-500"></i> SKENARIO &amp; PARAMETER
+              </h4>
+              <span class="text-[8px] font-mono bg-cyan-950 text-cyan-300 px-1.5 py-0.5 rounded border border-cyan-800">REALTIME LEM</span>
+            </div>
+
+            <!-- Selector Skenario Pembebanan Jurnal -->
+            <div class="space-y-1">
+              <label class="text-[9px] uppercase font-bold text-slate-400 block">Pilih Skenario Pembebanan Jurnal:</label>
+              <select id="selDam1Condition" onchange="setDam1Condition(this.value)" class="w-full bg-slate-900 border border-cyan-500/60 rounded-lg px-2 py-1.5 text-amber-300 font-bold text-[11px] outline-none">
+                <option value="static_steady" selected>1. Statik Steady State (Hu = 19.45 m)</option>
+                <option value="static_drawdown">2. Statik Rapid Drawdown (Penurunan Cepat)</option>
+                <option value="obe_seismic">3. Gempa OBE (T=100 Thn, PGA = 0.19g)</option>
+                <option value="mde_seismic">4. Gempa MDE (T=5000 Thn, PGA = 0.52g)</option>
+                <option value="makdisi_seed">5. Deformasi Makdisi-Seed (5 cm)</option>
+                <option value="seepage_flow">6. Rembesan, Uplift &amp; Erosi Buluh</option>
+              </select>
+            </div>
+
+            <!-- Sisi Lereng Yang Ditinjau -->
+            <div class="space-y-1">
+              <label class="text-[9px] uppercase font-bold text-slate-400 block">Sisi Lereng Ditinjau:</label>
+              <div class="grid grid-cols-2 gap-1.5">
+                <button type="button" id="btnDam1SlopeHilir" onclick="setDam1SlopeSide('hilir')" class="py-1 px-2 rounded bg-cyan-950 border border-cyan-500 text-cyan-300 font-bold text-[10px] text-center shadow">
+                  LERENG HILIR (KRITIS)
+                </button>
+                <button type="button" id="btnDam1SlopeHulu" onclick="setDam1SlopeSide('hulu')" class="py-1 px-2 rounded bg-slate-900 border border-slate-700 text-slate-400 font-bold text-[10px] text-center hover:text-white">
+                  LERENG HULU
+                </button>
+              </div>
+            </div>
+
+            <!-- Sliders Kontrol -->
+            <div class="space-y-2.5 text-xs font-mono">
+              <!-- Muka Air Waduk -->
+              <div class="p-2 bg-slate-900 rounded-lg border border-cyan-500/40">
+                <div class="flex justify-between items-center mb-0.5 text-slate-200">
+                  <span class="text-[10px] font-bold"><i class="fa-solid fa-water text-cyan-400 mr-1"></i> Muka Air Waduk (Hu):</span>
+                  <span id="lbl_dam1_hu" class="text-cyan-400 font-black text-xs font-mono">19.45 m</span>
+                </div>
+                <input type="range" id="slider_dam1_hu" min="9.0" max="20.5" value="19.45" step="0.05" oninput="updateDam1StabilitySimulation()" class="w-full accent-cyan-500 cursor-pointer h-1.5 bg-slate-700 rounded-lg">
+                <div class="flex justify-between text-[8px] text-slate-400 mt-0.5"><span>Dasar: 9.0 m</span><span class="text-cyan-300">Normal 19.45m</span><span>Puncak: 20.5m</span></div>
+              </div>
+
+              <!-- Percepatan Gempa PGA -->
+              <div class="p-2 bg-slate-900 rounded-lg border border-rose-500/40">
+                <div class="flex justify-between items-center mb-0.5 text-slate-200">
+                  <span class="text-[10px] font-bold"><i class="fa-solid fa-earth-asia text-rose-400 mr-1"></i> Percepatan Gempa (PGA):</span>
+                  <span id="lbl_dam1_pga" class="text-rose-400 font-black text-xs font-mono">0.19 g</span>
+                </div>
+                <input type="range" id="slider_dam1_pga" min="0.00" max="0.70" value="0.19" step="0.01" oninput="updateDam1StabilitySimulation()" class="w-full accent-rose-500 cursor-pointer h-1.5 bg-slate-700 rounded-lg">
+                <div class="flex justify-between text-[8px] text-slate-400 mt-0.5"><span>Statik: 0.0g</span><span class="text-amber-300">OBE 0.19g</span><span>MDE 0.52g</span></div>
+              </div>
+
+              <!-- Rasio Kedalaman Y/h -->
+              <div class="p-2 bg-slate-900 rounded-lg border border-amber-500/40">
+                <div class="flex justify-between items-center mb-0.5 text-slate-200">
+                  <span class="text-[10px] font-bold"><i class="fa-solid fa-layer-group text-amber-400 mr-1"></i> Rasio Kedalaman (Y/h):</span>
+                  <span id="lbl_dam1_yh" class="text-amber-400 font-black text-xs font-mono">1.00 (K=0.187)</span>
+                </div>
+                <input type="range" id="slider_dam1_yh" min="0.25" max="1.00" value="1.00" step="0.25" oninput="updateDam1StabilitySimulation()" class="w-full accent-amber-500 cursor-pointer h-1.5 bg-slate-700 rounded-lg">
+                <div class="flex justify-between text-[8px] text-slate-400 mt-0.5"><span>0.25 (Puncak)</span><span>0.50</span><span>0.75</span><span>1.00 (Dasar)</span></div>
+              </div>
+            </div>
+
+            <!-- LEGENDA LITOLOGI & MATERIAL BENDUNGAN 1 -->
+            <div class="p-2.5 bg-slate-900 rounded-lg border border-slate-800 text-[9px] font-mono space-y-1 mt-auto">
+              <span class="text-amber-400 font-tech font-bold block uppercase tracking-wider border-b border-slate-800 pb-1">ZONASI MATERIAL BENDUNGAN 1</span>
+              <div class="flex items-center gap-1.5"><span class="w-2.5 h-2.5 rounded bg-[#b45309] border border-amber-400 shrink-0"></span><span class="text-amber-300 font-bold">Zona A (Core Lempung): c=15 kPa, &phi;=23°</span></div>
+              <div class="flex items-center gap-1.5"><span class="w-2.5 h-2.5 rounded bg-[#64748b] border border-slate-400 shrink-0"></span><span class="text-slate-300 font-bold">Zona C (Shell Stabilitas): c=31 kPa, &phi;=26.79°</span></div>
+              <div class="flex items-center gap-1.5"><span class="w-2.5 h-2.5 rounded bg-[#475569] border border-slate-600 shrink-0"></span><span class="text-slate-400">Fondasi 1: Colluvial Clay (&gamma;=18, c=15)</span></div>
+              <div class="flex items-center gap-1.5"><span class="w-2.5 h-2.5 rounded bg-[#334155] border border-slate-700 shrink-0"></span><span class="text-slate-400">Fondasi 2: Weathered Diorite (&gamma;=19, c=30)</span></div>
+              <div class="flex items-center gap-1.5"><span class="w-2.5 h-2.5 rounded bg-[#1e293b] border border-slate-800 shrink-0"></span><span class="text-slate-400">Fondasi 3: Fresh Diorite (&gamma;=20, c=50)</span></div>
+              <div class="flex items-center gap-1.5"><span class="w-2.5 h-2.5 rounded-full bg-cyan-400 shrink-0 animate-ping"></span><span class="text-cyan-300 font-bold">PZ1-01 (16.56m) &bull; PZ2-02 (19.25m)</span></div>
+            </div>
+          </div>
+
+          <!-- KOLOM TENGAH (6 COLS): KANVAS 3D THREE.JS BEBAS PUTAR/PAN & D-PAD -->
+          <div class="lg:col-span-6 flex flex-col items-center justify-center bg-slate-950 rounded-xl border-2 border-cyan-500/70 shadow-[inset_0_0_50px_rgba(6,182,212,0.2)] relative overflow-hidden h-[420px] lg:h-full" id="dam13DContainer">
+            
+            <!-- HUD OVERLAY ATAS: STATUS DIMENSI BESAR -->
+            <div class="absolute top-2.5 left-3 right-3 flex flex-wrap justify-between items-center pointer-events-none z-10 gap-2">
+              <div class="bg-slate-900/95 backdrop-blur-md border-2 border-cyan-500/60 px-3 py-1.5 rounded-xl text-xs font-mono font-black flex items-center gap-2 shadow-2xl">
+                <i class="fa-solid fa-mountain text-cyan-400 text-sm"></i>
+                <span id="hudDam1Dims" class="text-cyan-300 tracking-wide font-tech text-[11px] sm:text-xs">
+                  Hd: 11.5m | Hu: 19.45m | Cw: 10.0m | B: 79.0m | Lereng: 1:3 | Elev: +20.5m
+                </span>
+              </div>
+              <div class="bg-slate-900/95 backdrop-blur-md border border-emerald-500/60 px-2.5 py-1 rounded-lg text-emerald-300 font-bold font-mono text-[10px] flex items-center gap-1.5 shadow-lg">
+                <span class="w-2 h-2 rounded-full bg-emerald-400 animate-ping"></span>
+                <span id="badgeDam1SimState">SPENCER LEM AKTIF</span>
+              </div>
+            </div>
+
+            <!-- ON-SCREEN D-PAD NAVIGATION FOR FREE PANNING -->
+            <div class="absolute top-14 right-3 z-10 flex flex-col items-center bg-slate-950/90 p-1.5 rounded-xl border border-cyan-500/50 shadow-2xl backdrop-blur-md gap-1">
+              <span class="text-[8px] font-mono text-cyan-400 font-bold uppercase tracking-wider mb-0.5">D-PAD 3D</span>
+              <button type="button" onclick="panDam1Camera(0, 3)" class="btn-dpad-dam1" title="Geser Model ke Atas (Pan Up)"><i class="fa-solid fa-chevron-up text-xs"></i></button>
+              <div class="flex gap-1">
+                <button type="button" onclick="panDam1Camera(-3, 0)" class="btn-dpad-dam1" title="Geser Model ke Kiri (Pan Left)"><i class="fa-solid fa-chevron-left text-xs"></i></button>
+                <button type="button" onclick="resetDam13DView()" class="btn-dpad-dam1 text-amber-400 font-bold" title="Reset Posisi Kamera"><i class="fa-solid fa-crosshairs text-xs"></i></button>
+                <button type="button" onclick="panDam1Camera(3, 0)" class="btn-dpad-dam1" title="Geser Model ke Kanan (Pan Right)"><i class="fa-solid fa-chevron-right text-xs"></i></button>
+              </div>
+              <button type="button" onclick="panDam1Camera(0, -3)" class="btn-dpad-dam1" title="Geser Model ke Bawah (Pan Down)"><i class="fa-solid fa-chevron-down text-xs"></i></button>
+              <div class="flex gap-1 mt-1 pt-1 border-t border-slate-800 w-full justify-center">
+                <button type="button" onclick="zoomDam1Camera(-8)" class="btn-dpad-dam1 text-cyan-400 font-bold text-xs" title="Zoom In (+)"><i class="fa-solid fa-plus"></i></button>
+                <button type="button" onclick="zoomDam1Camera(8)" class="btn-dpad-dam1 text-cyan-400 font-bold text-xs" title="Zoom Out (-)"><i class="fa-solid fa-minus"></i></button>
+              </div>
+            </div>
+
+            <!-- HUD OVERLAY BAWAH: PETUNJUK KONTROL BEBAS -->
+            <div class="absolute bottom-2.5 left-3 right-3 flex flex-wrap justify-between items-center pointer-events-none z-10 gap-2">
+              <span class="text-[10px] bg-slate-900/95 backdrop-blur-md border border-slate-700 px-3 py-1.5 rounded-xl font-mono text-slate-200 font-bold shadow-lg flex items-center gap-1.5">
+                <i class="fa-solid fa-arrows-up-down-left-right text-cyan-400"></i> <span id="lblDam1MouseGuide">Drag Kiri: Putar Bebas 360° | Drag Kanan / D-Pad: Geser Bebas | Scroll: Zoom</span>
+              </span>
+              <span class="text-[10px] bg-cyan-950/95 backdrop-blur-md border border-cyan-500 px-3 py-1.5 rounded-xl font-mono text-cyan-200 font-bold shadow-lg flex items-center gap-1.5">
+                <i class="fa-solid fa-circle-notch text-cyan-400"></i> BUSUR SPENCER: R = <span id="lblDam1ArcRadius">23.62m</span> &bull; SF = <span id="lblDam1HudSf">1.959</span>
+              </span>
+            </div>
+          </div>
+
+          <!-- KOLOM KANAN (3 COLS): HASIL ANALISIS REKAYASA & KALKULASI REALTIME -->
+          <div class="lg:col-span-3 flex flex-col gap-2.5 bg-slate-950/90 p-3.5 rounded-xl border border-slate-800 overflow-y-auto">
+            <h4 class="text-xs font-tech text-emerald-400 font-bold border-b border-slate-700 pb-1.5 flex items-center gap-2">
+              <i class="fa-solid fa-chart-pie text-emerald-500"></i> EVALUASI STABILITAS BENDUNGAN 1
+            </h4>
+
+            <!-- 1. FAKTOR KEAMANAN LERENG (SF SPENCER) -->
+            <div class="bg-slate-900 rounded-lg p-2.5 border border-slate-800 shadow-sm relative">
+              <div class="flex justify-between items-center mb-0.5">
+                <span class="text-[9px] text-slate-400 font-bold">FAKTOR KEAMANAN (SF SPENCER)</span>
+                <span id="badgeDam1SfCriteria" class="text-[8px] font-mono bg-emerald-950 text-emerald-300 px-1 py-0.2 rounded font-bold">SYARAT &gt; 1.50</span>
+              </div>
+              <div class="text-[9px] font-mono text-cyan-300/80 bg-cyan-950/40 p-1 rounded mb-1 border border-cyan-900/50">SF = &Sigma;(c'&bull;l + N'&bull;tan&phi;') / &Sigma;(W&bull;sin&alpha; + kh&bull;W&bull;cos&alpha;)</div>
+              <div class="flex items-baseline justify-between">
+                <span id="sim_dam1_sf_val" class="text-emerald-400 text-sm font-black font-mono">SF = 1.959 (AMAN)</span>
+                <span id="sim_dam1_sf_side" class="text-[9px] text-slate-400 font-bold">Hilir Steady State</span>
+              </div>
+            </div>
+
+            <!-- 2. KOEFISIEN SEISMIK PSEUDOSTATIK (kh) -->
+            <div class="bg-slate-900 rounded-lg p-2.5 border border-slate-800 shadow-sm relative">
+              <div class="flex justify-between items-center mb-0.5">
+                <span class="text-[9px] text-slate-400 font-bold">KOEFISIEN SEISMIK PSEUDOSTATIK (kh)</span>
+                <span class="text-[8px] font-mono bg-rose-950 text-rose-300 px-1 py-0.2 rounded font-bold">Pd T-14-2004-A</span>
+              </div>
+              <div class="text-[9px] font-mono text-rose-300/80 bg-rose-950/40 p-1 rounded mb-1 border border-rose-900/50">kh = K &times; PGA &bull; K(Y/h) terdisipasi</div>
+              <div class="flex items-baseline justify-between">
+                <span id="sim_dam1_kh_val" class="text-rose-400 text-xs font-black font-mono">kh = 0.187 (OBE)</span>
+                <span id="sim_dam1_k_factor" class="text-[9px] text-slate-400 font-bold">K = 0.187</span>
+              </div>
+            </div>
+
+            <!-- 3. DEFORMASI MAKDISI-SEED -->
+            <div class="bg-slate-900 rounded-lg p-2.5 border border-slate-800 shadow-sm relative">
+              <div class="flex justify-between items-center mb-0.5">
+                <span class="text-[9px] text-slate-400 font-bold">DEFORMASI TETAP (MAKDISI-SEED)</span>
+                <span class="text-[8px] font-mono bg-purple-950 text-purple-300 px-1 py-0.2 rounded font-bold">MDE 0.52g</span>
+              </div>
+              <div class="text-[9px] font-mono text-purple-300/80 bg-purple-950/40 p-1 rounded mb-1 border border-purple-900/50">U_perm &lt; 0.5 &times; Freeboard (400 cm) = 200 cm</div>
+              <div class="flex items-baseline justify-between">
+                <span id="sim_dam1_deform_val" class="text-purple-300 text-xs font-black font-mono">5.0 cm &lt; 200 cm</span>
+                <span class="text-[9px] text-emerald-400 font-bold">MEMENUHI (OK)</span>
+              </div>
+            </div>
+
+            <!-- 4. KEAMANAN REMBESAN (UPLIFT & PIPING) -->
+            <div class="bg-slate-900 rounded-lg p-2.5 border border-slate-800 shadow-sm relative space-y-1">
+              <span class="text-[9px] text-slate-400 font-bold block uppercase">KEAMANAN REMBESAN &bull; UPLIFT &amp; PIPING</span>
+              <div class="flex justify-between text-[10px]">
+                <span class="text-slate-300">SF Uplift (&gamma;n&bull;t / &gamma;w&bull;h):</span>
+                <b id="sim_dam1_uplift_sf" class="text-emerald-400 font-mono">1.547 &ge; 1.50 (OK)</b>
+              </div>
+              <div class="flex justify-between text-[10px]">
+                <span class="text-slate-300">Piping Zona A (ic/ie):</span>
+                <b id="sim_dam1_piping_core" class="text-emerald-400 font-mono">4.23 &ge; 3.00 (OK)</b>
+              </div>
+              <div class="flex justify-between text-[10px]">
+                <span class="text-slate-300">Piping Kaki Hilir (ic/ie):</span>
+                <b id="sim_dam1_piping_toe" class="text-emerald-400 font-mono">3.07 &ge; 3.00 (OK)</b>
+              </div>
+            </div>
+
+            <!-- 5. KESIMPULAN REKAYASA JURNAL -->
+            <div class="mt-auto bg-slate-900 border-2 border-indigo-500/40 rounded-xl p-2.5 shadow">
+              <span class="text-[9px] font-black font-tech text-indigo-400 block mb-1 border-b border-indigo-500/30 pb-0.5">KESIMPULAN REKAYASA JURNAL</span>
+              <p id="sim_dam1_conclusion" class="text-[10px] font-sans text-slate-300 leading-relaxed text-justify">
+                <span class="text-emerald-400 font-bold text-[10px]"><i class="fa-solid fa-circle-check"></i> AMAN TERVERIFIKASI.</span><br>
+                Hasil analisis stabilitas lereng Bendungan 1 Tujuh Bukit kondisi statik (SF=4.21 &amp; 1.96), gempa OBE (SF=1.24&ndash;3.31), gempa MDE (deformasi 5 cm &lt; 200 cm), serta analisis rembesan uplift (SF=1.55) dan piping (SF=4.23 &amp; 3.07) seluruhnya memenuhi kriteria keamanan. Desain eksisting memadai dan tidak memerlukan modifikasi desain atau penambahan counterweight.
+              </p>
+            </div>
+          </div>
+
+        </div>
+      </div>
+
+      <!-- 9 TECHNICAL REVIEW MODULES (ACCORDION & TABULAR RECAPITULATION FROM JOURNAL) -->
+      <div class="space-y-3">
+        <div class="flex items-center justify-between border-b border-slate-800 pb-2">
+          <h3 class="text-xs font-bold text-amber-300 font-tech flex items-center gap-2">
+            <i class="fa-solid fa-book-open text-amber-400"></i> REKAPITULASI DATA JURNAL TERAPAN &amp; FORMULASI REKAYASA BENDUNGAN 1
+          </h3>
+          <span class="text-[10px] text-slate-400">PT Bumi Suksesindo &bull; Merdeka Copper Gold</span>
+        </div>
+
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-3.5 text-xs font-mono">
+          
+          <!-- MODUL 1: TABEL 1 DATA TEKNIS BENDUNGAN 1 -->
+          <div class="cmd-card p-4 space-y-2 border-l-4 border-l-cyan-500 bg-slate-900/90">
+            <div class="flex justify-between items-center border-b border-slate-800 pb-1">
+              <h4 class="font-bold text-white font-tech text-xs">Modul 1: Tabel 1. Data Teknis Bendungan 1 Tujuh Bukit</h4>
+              <span class="text-[9px] px-1.5 py-0.5 rounded bg-cyan-950 text-cyan-300 border border-cyan-500 font-bold">17 PARAMETER</span>
+            </div>
+            <div class="overflow-x-auto max-h-56 overflow-y-auto">
+              <table class="w-full text-[10px] text-left">
+                <thead class="bg-slate-950 text-slate-400 sticky top-0"><tr><th class="p-1.5">No</th><th class="p-1.5">Uraian Parameter</th><th class="p-1.5 text-right text-cyan-300">Nilai</th></tr></thead>
+                <tbody class="divide-y divide-slate-800 text-slate-300">
+                  <tr><td class="p-1 text-center">1</td><td class="p-1">Elev. Puncak Bendungan</td><td class="p-1 text-right font-bold text-white">20,5 m</td></tr>
+                  <tr><td class="p-1 text-center">2</td><td class="p-1">Elev. Muka Air Q1000 tahun</td><td class="p-1 text-right font-bold text-white">20,0 m</td></tr>
+                  <tr><td class="p-1 text-center">3</td><td class="p-1">Elev. Puncak Pelimpah (Spillway)</td><td class="p-1 text-right font-bold text-white">19,0 m</td></tr>
+                  <tr><td class="p-1 text-center">4</td><td class="p-1">Elev. Dasar, Udik Downstream</td><td class="p-1 text-right font-bold text-white">9,0 m</td></tr>
+                  <tr><td class="p-1 text-center">5</td><td class="p-1">Tinggi Maksimum Bendungan</td><td class="p-1 text-right font-bold text-amber-300">11,5 m</td></tr>
+                  <tr><td class="p-1 text-center">6</td><td class="p-1">Jagaan Normal</td><td class="p-1 text-right font-bold text-white">1,5 m</td></tr>
+                  <tr><td class="p-1 text-center">7</td><td class="p-1">Jagaan Minimum</td><td class="p-1 text-right font-bold text-white">0,5 m</td></tr>
+                  <tr><td class="p-1 text-center">8</td><td class="p-1">Lebar Puncak Bendungan (Crest)</td><td class="p-1 text-right font-bold text-white">10,0 m</td></tr>
+                  <tr><td class="p-1 text-center">9</td><td class="p-1">Bentang Bendungan (Span)</td><td class="p-1 text-right font-bold text-white">400,0 m</td></tr>
+                  <tr><td class="p-1 text-center">10</td><td class="p-1">Vol. Tampungan s/d Elev. Pelimpah</td><td class="p-1 text-right font-bold text-cyan-300">389.000 m³</td></tr>
+                  <tr><td class="p-1 text-center">11</td><td class="p-1">Vol. Tampungan s/d Puncak Bendungan</td><td class="p-1 text-right font-bold text-cyan-300">611.000 m³</td></tr>
+                  <tr><td class="p-1 text-center">12</td><td class="p-1">Kemiringan Lereng Upstream (Hulu)</td><td class="p-1 text-right font-bold text-emerald-400">1 : 3</td></tr>
+                  <tr><td class="p-1 text-center">13</td><td class="p-1">Kemiringan Lereng Downstream (Hilir)</td><td class="p-1 text-right font-bold text-emerald-400">1 : 3</td></tr>
+                  <tr><td class="p-1 text-center">14</td><td class="p-1">Lebar Pelimpah (Spillway)</td><td class="p-1 text-right font-bold text-white">5,0 m</td></tr>
+                  <tr><td class="p-1 text-center">15</td><td class="p-1">Kemiringan Talud Pelimpah</td><td class="p-1 text-right font-bold text-white">1 : 7</td></tr>
+                  <tr><td class="p-1 text-center">16</td><td class="p-1">Luas Genangan Waduk</td><td class="p-1 text-right font-bold text-white">161.586 m²</td></tr>
+                  <tr><td class="p-1 text-center">17</td><td class="p-1">Luas Daerah Tangkapan Air (DTA)</td><td class="p-1 text-right font-bold text-white">494.700 m²</td></tr>
+                </tbody>
+              </table>
+            </div>
+          </div>
+
+          <!-- MODUL 2: TABEL 3 PARAMETER MATERIAL STUDI -->
+          <div class="cmd-card p-4 space-y-2 border-l-4 border-l-amber-500 bg-slate-900/90">
+            <div class="flex justify-between items-center border-b border-slate-800 pb-1">
+              <h4 class="font-bold text-white font-tech text-xs">Modul 2: Tabel 3. Parameter Geoteknik Material Model</h4>
+              <span class="text-[9px] px-1.5 py-0.5 rounded bg-amber-950 text-amber-300 border border-amber-600 font-bold">LABORATORIUM</span>
+            </div>
+            <div class="overflow-x-auto max-h-56 overflow-y-auto">
+              <table class="w-full text-[10px] text-left">
+                <thead class="bg-slate-950 text-slate-400 sticky top-0">
+                  <tr>
+                    <th class="p-1.5">Zona / Lapisan</th>
+                    <th class="p-1.5 text-right">&gamma;wet (kN/m³)</th>
+                    <th class="p-1.5 text-right">c' (kN/m²)</th>
+                    <th class="p-1.5 text-right">&phi;' (°)</th>
+                    <th class="p-1.5 text-right text-cyan-300">k (m/s)</th>
+                  </tr>
+                </thead>
+                <tbody class="divide-y divide-slate-800 text-slate-300">
+                  <tr class="bg-amber-950/20 font-bold"><td class="p-1.5 text-amber-300">Zona A (Core Kedap)</td><td class="p-1 text-right">17,35</td><td class="p-1 text-right">15,00</td><td class="p-1 text-right">23,00</td><td class="p-1 text-right text-cyan-300">1,00E-08</td></tr>
+                  <tr class="font-bold"><td class="p-1.5 text-slate-200">Zona C (Shell Stabilitas)</td><td class="p-1 text-right">17,35</td><td class="p-1 text-right">31,00</td><td class="p-1 text-right">26,79</td><td class="p-1 text-right text-cyan-300">1,60E-07</td></tr>
+                  <tr><td class="p-1.5 text-slate-300">Fondasi: Colluvial Clay</td><td class="p-1 text-right">18,00</td><td class="p-1 text-right">15,00</td><td class="p-1 text-right">23,00</td><td class="p-1 text-right text-cyan-300">1,00E-08</td></tr>
+                  <tr><td class="p-1.5 text-slate-300">Fondasi: Weathered Diorit</td><td class="p-1 text-right">19,00</td><td class="p-1 text-right">30,00</td><td class="p-1 text-right">25,00</td><td class="p-1 text-right text-cyan-300">3,00E-08</td></tr>
+                  <tr><td class="p-1.5 text-slate-300">Fondasi: Fresh Diorit</td><td class="p-1 text-right">20,00</td><td class="p-1 text-right">50,00</td><td class="p-1 text-right">26,00</td><td class="p-1 text-right text-cyan-300">1,00E-07</td></tr>
+                </tbody>
+              </table>
+            </div>
+            <p class="text-[9px] text-slate-400 mt-1">Formasi Batuampar: breksi gunung api, tuff, batupasir tufan, lava andesit, dan batuan diorit terlapukkan.</p>
+          </div>
+
+          <!-- MODUL 3: TABEL 2 KELAS RISIKO & BEBAN GEMPA -->
+          <div class="cmd-card p-4 space-y-2 border-l-4 border-l-rose-500 bg-slate-900/90">
+            <div class="flex justify-between items-center border-b border-slate-800 pb-1">
+              <h4 class="font-bold text-white font-tech text-xs">Modul 3: Tabel 2. Kelas Risiko Bendungan (Pd T-14-2004-A)</h4>
+              <span class="text-[9px] px-1.5 py-0.5 rounded bg-rose-950 text-rose-300 border border-rose-500 font-bold">KELAS II (MODERAT)</span>
+            </div>
+            <div class="space-y-1 text-[10px] text-slate-300">
+              <div class="flex justify-between p-1 bg-slate-950 rounded"><span>1. Kapasitas Waduk (844.000 m³):</span><b class="text-amber-300">Bobot FRK = 2</b></div>
+              <div class="flex justify-between p-1 bg-slate-950 rounded"><span>2. Tinggi Bendungan (19.5 m):</span><b class="text-amber-300">Bobot FR = 2</b></div>
+              <div class="flex justify-between p-1 bg-slate-950 rounded"><span>3. Kebutuhan Evakuasi Hilir (100 jiwa):</span><b class="text-amber-300">Bobot FRE = 4</b></div>
+              <div class="flex justify-between p-1 bg-slate-950 rounded"><span>4. Tingkat Kerusakan Hilir (Moderat):</span><b class="text-amber-300">Bobot FRH = 4</b></div>
+              <div class="flex justify-between p-1 bg-slate-900 rounded font-bold border border-slate-800"><span class="text-white">Total Faktor Risiko (FRtotal):</span><b class="text-rose-400">12 &rarr; Klasifikasi II (Moderat)</b></div>
+            </div>
+            <div class="p-2 bg-slate-950 rounded text-[9px] text-slate-400 space-y-0.5">
+              <div>&bull; <b>Gempa OBE (T=100 thn):</b> Fk min &ge; 1.20 | PGA Peta Gempa 2022 = <b class="text-cyan-300">0.19 g</b></div>
+              <div>&bull; <b>Gempa MDE (T=3000-5000 thn):</b> Fk &ge; 1.00 (atau deformasi &lt; 50% jagaan) | PGA = <b class="text-rose-300">0.52 g</b></div>
+            </div>
+          </div>
+
+          <!-- MODUL 4: TABEL 5 ANALISIS STATIK STEADY & DRAWDOWN -->
+          <div class="cmd-card p-4 space-y-2 border-l-4 border-l-emerald-500 bg-slate-900/90">
+            <div class="flex justify-between items-center border-b border-slate-800 pb-1">
+              <h4 class="font-bold text-white font-tech text-xs">Modul 4: Tabel 5. Hasil Analisis Stabilitas Statik (SLOPE/W)</h4>
+              <span class="text-[9px] px-1.5 py-0.5 rounded bg-emerald-950 text-emerald-300 border border-emerald-500 font-bold">SPENCER METHOD</span>
+            </div>
+            <table class="w-full text-[10px] text-left">
+              <thead class="bg-slate-950 text-slate-400">
+                <tr><th class="p-1.5">Sisi Lereng</th><th class="p-1.5">Kondisi Air</th><th class="p-1.5 text-center">Muka Air</th><th class="p-1.5 text-right">Faktor Keamanan (SF)</th><th class="p-1.5 text-center">Syarat</th><th class="p-1.5 text-center">Cek</th></tr>
+              </thead>
+              <tbody class="divide-y divide-slate-800 text-slate-300">
+                <tr class="bg-emerald-950/20 font-bold"><td class="p-1.5 text-white">Hulu</td><td>Steady State</td><td class="text-center">19,45 m</td><td class="text-right text-emerald-400 font-mono text-xs">4,210</td><td class="text-center">SF &gt; 1,50</td><td class="text-center text-emerald-400">OK</td></tr>
+                <tr><td class="p-1.5 text-white">Hulu</td><td>Rapid Drawdown</td><td class="text-center">19,45 m</td><td class="text-right text-emerald-300 font-mono">2,262</td><td class="text-center">SF &gt; 1,30</td><td class="text-center text-emerald-400">OK</td></tr>
+                <tr class="bg-emerald-950/20 font-bold"><td class="p-1.5 text-white">Hilir</td><td>Steady State</td><td class="text-center">19,45 m</td><td class="text-right text-emerald-400 font-mono text-xs">1,959</td><td class="text-center">SF &gt; 1,50</td><td class="text-center text-emerald-400">OK</td></tr>
+                <tr><td class="p-1.5 text-white">Hilir</td><td>Rapid Drawdown</td><td class="text-center">19,45 m</td><td class="text-right text-emerald-300 font-mono">1,969</td><td class="text-center">SF &gt; 1,30</td><td class="text-center text-emerald-400">OK</td></tr>
+              </tbody>
+            </table>
+            <p class="text-[9px] text-slate-400">Kondisi steady state sisi hulu memiliki angka keamanan tertinggi (4.210) berkat penyaluran beban air yang stabil.</p>
+          </div>
+
+          <!-- MODUL 5: TABEL 6 PSEUDOSTATIK GEMPA OBE -->
+          <div class="cmd-card p-4 space-y-2 border-l-4 border-l-cyan-500 bg-slate-900/90">
+            <div class="flex justify-between items-center border-b border-slate-800 pb-1">
+              <h4 class="font-bold text-white font-tech text-xs">Modul 5: Tabel 6. Stabilitas Beban Gempa OBE (PGA = 0.19g)</h4>
+              <span class="text-[9px] px-1.5 py-0.5 rounded bg-cyan-950 text-cyan-300 border border-cyan-500 font-bold">T = 100 TAHUN</span>
+            </div>
+            <div class="overflow-x-auto max-h-48 overflow-y-auto">
+              <table class="w-full text-[10px] text-left">
+                <thead class="bg-slate-950 text-slate-400 sticky top-0">
+                  <tr><th class="p-1">Sisi</th><th class="p-1 text-center">Y/h</th><th class="p-1 text-center">K</th><th class="p-1 text-right text-cyan-300">SF Terhitung</th><th class="p-1 text-center">Syarat</th><th class="p-1 text-center">Cek</th></tr>
+                </thead>
+                <tbody class="divide-y divide-slate-800 text-slate-300 font-mono text-[9.5px]">
+                  <tr><td class="p-1 text-white font-bold">Hulu</td><td class="text-center">0,25</td><td class="text-center">0,272</td><td class="text-right font-bold text-cyan-300">3,308</td><td class="text-center">SF &gt; 1,20</td><td class="text-center text-emerald-400 font-bold">OK</td></tr>
+                  <tr><td class="p-1 text-white font-bold">Hulu</td><td class="text-center">0,50</td><td class="text-center">0,227</td><td class="text-right font-bold text-cyan-300">2,754</td><td class="text-center">SF &gt; 1,20</td><td class="text-center text-emerald-400 font-bold">OK</td></tr>
+                  <tr><td class="p-1 text-white font-bold">Hulu</td><td class="text-center">0,75</td><td class="text-center">0,207</td><td class="text-right font-bold text-cyan-300">2,406</td><td class="text-center">SF &gt; 1,20</td><td class="text-center text-emerald-400 font-bold">OK</td></tr>
+                  <tr><td class="p-1 text-white font-bold">Hulu</td><td class="text-center">1,00</td><td class="text-center">0,187</td><td class="text-right font-bold text-cyan-300">1,749</td><td class="text-center">SF &gt; 1,20</td><td class="text-center text-emerald-400 font-bold">OK</td></tr>
+                  <tr class="bg-cyan-950/20"><td class="p-1 text-amber-300 font-bold">Hilir</td><td class="text-center">0,25</td><td class="text-center">0,272</td><td class="text-right font-bold text-cyan-300">3,134</td><td class="text-center">SF &gt; 1,20</td><td class="text-center text-emerald-400 font-bold">OK</td></tr>
+                  <tr class="bg-cyan-950/20"><td class="p-1 text-amber-300 font-bold">Hilir</td><td class="text-center">0,50</td><td class="text-center">0,227</td><td class="text-right font-bold text-cyan-300">2,225</td><td class="text-center">SF &gt; 1,20</td><td class="text-center text-emerald-400 font-bold">OK</td></tr>
+                  <tr class="bg-cyan-950/20"><td class="p-1 text-amber-300 font-bold">Hilir</td><td class="text-center">0,75</td><td class="text-center">0,207</td><td class="text-right font-bold text-cyan-300">1,753</td><td class="text-center">SF &gt; 1,20</td><td class="text-center text-emerald-400 font-bold">OK</td></tr>
+                  <tr class="bg-cyan-950/20"><td class="p-1 text-amber-300 font-bold">Hilir</td><td class="text-center">1,00</td><td class="text-center">0,187</td><td class="text-right font-bold text-cyan-300">1,239</td><td class="text-center">SF &gt; 1,20</td><td class="text-center text-emerald-400 font-bold">OK</td></tr>
+                </tbody>
+              </table>
+            </div>
+          </div>
+
+          <!-- MODUL 6: TABEL 7 PSEUDOSTATIK GEMPA MDE -->
+          <div class="cmd-card p-4 space-y-2 border-l-4 border-l-amber-500 bg-slate-900/90">
+            <div class="flex justify-between items-center border-b border-slate-800 pb-1">
+              <h4 class="font-bold text-white font-tech text-xs">Modul 6: Tabel 7. Stabilitas Beban Gempa MDE (PGA = 0.52g)</h4>
+              <span class="text-[9px] px-1.5 py-0.5 rounded bg-amber-950 text-amber-300 border border-amber-600 font-bold">T = 5000 TAHUN</span>
+            </div>
+            <div class="overflow-x-auto max-h-48 overflow-y-auto">
+              <table class="w-full text-[10px] text-left">
+                <thead class="bg-slate-950 text-slate-400 sticky top-0">
+                  <tr><th class="p-1">Sisi</th><th class="p-1 text-center">Y/h</th><th class="p-1 text-center">K</th><th class="p-1 text-right text-amber-300">SF Terhitung</th><th class="p-1 text-center">Syarat</th><th class="p-1 text-center">Evaluasi</th></tr>
+                </thead>
+                <tbody class="divide-y divide-slate-800 text-slate-300 font-mono text-[9.5px]">
+                  <tr><td class="p-1 text-white font-bold">Hulu</td><td class="text-center">0,25</td><td class="text-center">0,583</td><td class="text-right font-bold text-amber-300">1,971</td><td class="text-center">SF &gt; 1,00</td><td class="text-center text-emerald-400 font-bold">OK</td></tr>
+                  <tr><td class="p-1 text-white font-bold">Hulu</td><td class="text-center">0,50</td><td class="text-center">0,486</td><td class="text-right font-bold text-amber-300">1,682</td><td class="text-center">SF &gt; 1,00</td><td class="text-center text-emerald-400 font-bold">OK</td></tr>
+                  <tr><td class="p-1 text-white font-bold">Hulu</td><td class="text-center">0,75</td><td class="text-center">0,443</td><td class="text-right font-bold text-amber-300">1,490</td><td class="text-center">SF &gt; 1,00</td><td class="text-center text-emerald-400 font-bold">OK</td></tr>
+                  <tr><td class="p-1 text-white font-bold">Hulu</td><td class="text-center">1,00</td><td class="text-center">0,400</td><td class="text-right font-bold text-amber-300">1,103</td><td class="text-center">SF &gt; 1,00</td><td class="text-center text-emerald-400 font-bold">OK</td></tr>
+                  <tr class="bg-amber-950/20"><td class="p-1 text-amber-300 font-bold">Hilir</td><td class="text-center">0,25</td><td class="text-center">0,583</td><td class="text-right font-bold text-amber-300">1,917</td><td class="text-center">SF &gt; 1,00</td><td class="text-center text-emerald-400 font-bold">OK</td></tr>
+                  <tr class="bg-amber-950/20"><td class="p-1 text-amber-300 font-bold">Hilir</td><td class="text-center">0,50</td><td class="text-center">0,486</td><td class="text-right font-bold text-amber-300">1,484</td><td class="text-center">SF &gt; 1,00</td><td class="text-center text-emerald-400 font-bold">OK</td></tr>
+                  <tr class="bg-amber-950/20"><td class="p-1 text-amber-300 font-bold">Hilir</td><td class="text-center">0,75</td><td class="text-center">0,443</td><td class="text-right font-bold text-amber-300">1,219</td><td class="text-center">SF &gt; 1,00</td><td class="text-center text-emerald-400 font-bold">OK</td></tr>
+                  <tr class="bg-rose-950/30 font-bold"><td class="p-1 text-rose-300">Hilir</td><td class="text-center">1,00</td><td class="text-center">0,400</td><td class="text-right text-rose-400">0,889</td><td class="text-center">SF &gt; 1,00</td><td class="text-center text-amber-300">Cek Deformasi Makdisi</td></tr>
+                </tbody>
+              </table>
+            </div>
+          </div>
+
+          <!-- MODUL 7: TABEL 8 DEFORMASI MAKDISI-SEED -->
+          <div class="cmd-card p-4 space-y-2 border-l-4 border-l-purple-500 bg-slate-900/90">
+            <div class="flex justify-between items-center border-b border-slate-800 pb-1">
+              <h4 class="font-bold text-white font-tech text-xs">Modul 7: Tabel 8. Hasil Analisis Deformasi Makdisi-Seed</h4>
+              <span class="text-[9px] px-1.5 py-0.5 rounded bg-purple-950 text-purple-300 border border-purple-500 font-bold">DEFORMASI TETAP</span>
+            </div>
+            <div class="overflow-x-auto max-h-48 overflow-y-auto">
+              <table class="w-full text-[10px] text-left">
+                <thead class="bg-slate-950 text-slate-400 sticky top-0">
+                  <tr><th class="p-1">Sisi</th><th class="p-1 text-center">Y/h</th><th class="p-1 text-right text-purple-300">Deformasi</th><th class="p-1 text-center">Tinggi Jagaan</th><th class="p-1 text-center">Kriteria Keberterimaan</th><th class="p-1 text-center">Cek</th></tr>
+                </thead>
+                <tbody class="divide-y divide-slate-800 text-slate-300 font-mono text-[9.5px]">
+                  <tr><td class="p-1 text-white font-bold">Hulu</td><td class="text-center">0,25</td><td class="text-right text-emerald-400">0 cm</td><td class="text-center">400 cm</td><td class="text-center">&lt; 0.5 Tinggi Jagaan (200 cm)</td><td class="text-center text-emerald-400 font-bold">OK</td></tr>
+                  <tr><td class="p-1 text-white font-bold">Hulu</td><td class="text-center">0,50</td><td class="text-right text-emerald-400">0 cm</td><td class="text-center">400 cm</td><td class="text-center">&lt; 0.5 Tinggi Jagaan (200 cm)</td><td class="text-center text-emerald-400 font-bold">OK</td></tr>
+                  <tr><td class="p-1 text-white font-bold">Hulu</td><td class="text-center">0,75</td><td class="text-right text-emerald-400">0 cm</td><td class="text-center">400 cm</td><td class="text-center">&lt; 0.5 Tinggi Jagaan (200 cm)</td><td class="text-center text-emerald-400 font-bold">OK</td></tr>
+                  <tr><td class="p-1 text-white font-bold">Hulu</td><td class="text-center">1,00</td><td class="text-right text-emerald-400">0 cm</td><td class="text-center">400 cm</td><td class="text-center">&lt; 0.5 Tinggi Jagaan (200 cm)</td><td class="text-center text-emerald-400 font-bold">OK</td></tr>
+                  <tr class="bg-purple-950/20"><td class="p-1 text-purple-300 font-bold">Hilir</td><td class="text-center">0,25</td><td class="text-right text-emerald-400">0 cm</td><td class="text-center">400 cm</td><td class="text-center">&lt; 0.5 Tinggi Jagaan (200 cm)</td><td class="text-center text-emerald-400 font-bold">OK</td></tr>
+                  <tr class="bg-purple-950/20"><td class="p-1 text-purple-300 font-bold">Hilir</td><td class="text-center">0,50</td><td class="text-right text-emerald-400">0 cm</td><td class="text-center">400 cm</td><td class="text-center">&lt; 0.5 Tinggi Jagaan (200 cm)</td><td class="text-center text-emerald-400 font-bold">OK</td></tr>
+                  <tr class="bg-purple-950/20"><td class="p-1 text-purple-300 font-bold">Hilir</td><td class="text-center">0,75</td><td class="text-right text-emerald-400">0 cm</td><td class="text-center">400 cm</td><td class="text-center">&lt; 0.5 Tinggi Jagaan (200 cm)</td><td class="text-center text-emerald-400 font-bold">OK</td></tr>
+                  <tr class="bg-purple-950/40 font-bold"><td class="p-1 text-purple-300">Hilir</td><td class="text-center">1,00</td><td class="text-right text-amber-300">5 cm</td><td class="text-center">400 cm</td><td class="text-center">5 cm &lt; 200 cm (0.5 Jagaan)</td><td class="text-center text-emerald-400 font-bold">OK</td></tr>
+                </tbody>
+              </table>
+            </div>
+            <p class="text-[9px] text-slate-400">Deformasi maksimum pada tumit hilir (5 cm) jauh lebih kecil dari batas izin 200 cm sehingga bendungan dinilai aman tanpa keruntuhan.</p>
+          </div>
+
+          <!-- MODUL 8: REMBESAN UPLIFT & PIPING DENGAN RUMUS LENGKAP -->
+          <div class="cmd-card p-4 space-y-2 border-l-4 border-l-blue-500 bg-slate-900/90">
+            <div class="flex justify-between items-center border-b border-slate-800 pb-1">
+              <h4 class="font-bold text-white font-tech text-xs">Modul 8: Analisis Keamanan Rembesan: Uplift &amp; Erosi Buluh</h4>
+              <span class="text-[9px] px-1.5 py-0.5 rounded bg-blue-950 text-blue-300 border border-blue-500 font-bold">SEEP/W ELEMEN HINGGA</span>
+            </div>
+            <div class="space-y-2 text-[10px] text-slate-300">
+              <div class="p-2 bg-slate-950 rounded border border-slate-800 space-y-1">
+                <b class="text-cyan-300 block">1. Evaluasi Tekanan Angkat (Uplift Pressure):</b>
+                <code class="text-cyan-400 font-bold block">SF = (&gamma;n &times; t) / (&gamma;w &times; h)</code>
+                <div>&bull; &gamma;n = 18.0 kN/m³ (berat volume fondasi colluvial clay)</div>
+                <div>&bull; t = 1.7193 m (tebal overburden) &bull; &gamma;w = 10 kN/m³ &bull; h = 2.0 m</div>
+                <div class="text-emerald-400 font-bold mt-0.5">SF = (18 &times; 1.7193) / (10 &times; 2.0) = 1.547 &ge; 1.50 (MEMENUHI)</div>
+              </div>
+              <div class="p-2 bg-slate-950 rounded border border-slate-800 space-y-1">
+                <b class="text-amber-300 block">2. Evaluasi Erosi Buluh (Piping &amp; Boiling):</b>
+                <code class="text-amber-400 font-bold block">ic = (Gs - 1) / (1 + e) &bull; SF = ic / ie &ge; 3.00</code>
+                <div>&bull; <b>Zona A (Tubuh):</b> Gs=2.586, e=0.50 &rarr; ic=1.057; ie=0.25 &rarr; <b class="text-emerald-400">SF = 4.23 &ge; 3.00 (OK)</b></div>
+                <div>&bull; <b>Kaki Hilir:</b> Gs=2.635, e=0.777 &rarr; ic=0.92; ie=0.30 &rarr; <b class="text-emerald-400">SF = 3.07 &ge; 3.00 (OK)</b></div>
+              </div>
+            </div>
+          </div>
+
+          <!-- MODUL 9: TABEL 4 MONITORING PIEZOMETER -->
+          <div class="cmd-card p-4 space-y-2 border-l-4 border-l-teal-500 bg-slate-900/90">
+            <div class="flex justify-between items-center border-b border-slate-800 pb-1">
+              <h4 class="font-bold text-white font-tech text-xs">Modul 9: Tabel 4. Rekapitulasi Monitoring Piezometer</h4>
+              <span class="text-[9px] px-1.5 py-0.5 rounded bg-teal-950 text-teal-300 border border-teal-500 font-bold">INSTRUMENTASI AKTUAL</span>
+            </div>
+            <table class="w-full text-[10px] text-left">
+              <thead class="bg-slate-950 text-slate-400">
+                <tr><th class="p-1.5">No</th><th class="p-1.5">Tanggal Baca</th><th class="p-1.5 text-center">Muka Air Waduk</th><th class="p-1.5 text-center">Kode Piezometer</th><th class="p-1.5 text-right text-cyan-300">Elev. Tekanan Air Pori</th></tr>
+              </thead>
+              <tbody class="divide-y divide-slate-800 text-slate-300 font-mono">
+                <tr><td class="p-1.5 text-center">1</td><td>24 Februari 2021</td><td class="text-center font-bold text-white">19,45 m</td><td class="text-center font-bold text-amber-300">PZ2-02</td><td class="text-right font-bold text-cyan-300">19,25 m</td></tr>
+                <tr><td class="p-1.5 text-center">2</td><td>24 Februari 2021</td><td class="text-center font-bold text-white">19,45 m</td><td class="text-center font-bold text-amber-300">PZ1-01</td><td class="text-right font-bold text-cyan-300">16,56 m</td></tr>
+              </tbody>
+            </table>
+            <p class="text-[9px] text-slate-400 mt-1">Data piezometer PZ1-01 (offset 77.1 m) dan PZ2-02 (offset 43.9 m) membuktikan penurunan garis freatik yang teratur dan aman di dalam tubuh bendungan.</p>
+          </div>
+
+          <!-- MODUL 10: WORKFLOW METODOLOGI PENELITIAN -->
+          <div class="cmd-card p-4 space-y-2 border-l-4 border-l-indigo-500 bg-slate-900/90 md:col-span-2">
+            <div class="flex justify-between items-center border-b border-slate-800 pb-1">
+              <h4 class="font-bold text-white font-tech text-xs">Modul 10: Gambar 1. Diagram Alir (Workflow) Metodologi Penelitian &amp; Evaluasi Geoteknik</h4>
+              <span class="text-[9px] px-1.5 py-0.5 rounded bg-indigo-950 text-indigo-300 border border-indigo-500 font-bold">STANDAR EVALUASI</span>
+            </div>
+            <div class="grid grid-cols-2 sm:grid-cols-6 gap-2 text-center text-[10px]">
+              <div class="p-2 bg-slate-950 rounded-lg border border-slate-800 space-y-1">
+                <span class="w-5 h-5 rounded-full bg-cyan-900 text-cyan-300 font-bold mx-auto flex items-center justify-center text-[9px]">1</span>
+                <b class="text-white block">Pengumpulan Data</b>
+                <span class="text-[8px] text-slate-400">Data Primer Sampel &amp; Sekunder Geometri</span>
+              </div>
+              <div class="p-2 bg-slate-950 rounded-lg border border-slate-800 space-y-1">
+                <span class="w-5 h-5 rounded-full bg-cyan-900 text-cyan-300 font-bold mx-auto flex items-center justify-center text-[9px]">2</span>
+                <b class="text-white block">Penentuan Parameter</b>
+                <span class="text-[8px] text-slate-400">Uji Lab Zona A, C &amp; Fondasi Diorit</span>
+              </div>
+              <div class="p-2 bg-slate-950 rounded-lg border border-slate-800 space-y-1">
+                <span class="w-5 h-5 rounded-full bg-cyan-900 text-cyan-300 font-bold mx-auto flex items-center justify-center text-[9px]">3</span>
+                <b class="text-white block">Pembuatan Model</b>
+                <span class="text-[8px] text-slate-400">Penampang Memanjang &amp; Piezometer</span>
+              </div>
+              <div class="p-2 bg-slate-950 rounded-lg border border-slate-800 space-y-1">
+                <span class="w-5 h-5 rounded-full bg-cyan-900 text-cyan-300 font-bold mx-auto flex items-center justify-center text-[9px]">4</span>
+                <b class="text-white block">Analisis Numerik</b>
+                <span class="text-[8px] text-slate-400">SLOPE/W Statik, OBE, MDE &amp; SEEP/W</span>
+              </div>
+              <div class="p-2 bg-slate-950 rounded-lg border border-slate-800 space-y-1">
+                <span class="w-5 h-5 rounded-full bg-emerald-900 text-emerald-300 font-bold mx-auto flex items-center justify-center text-[9px]">5</span>
+                <b class="text-emerald-400 block">Cek FK Minimum</b>
+                <span class="text-[8px] text-emerald-300">Statik &ge; 1.5 &bull; OBE &ge; 1.2 &bull; MDE &ge; 1.0</span>
+              </div>
+              <div class="p-2 bg-slate-950 rounded-lg border border-slate-800 space-y-1">
+                <span class="w-5 h-5 rounded-full bg-indigo-900 text-indigo-300 font-bold mx-auto flex items-center justify-center text-[9px]">6</span>
+                <b class="text-white block">Kesimpulan Akhir</b>
+                <span class="text-[8px] text-slate-400">Desain Memadai Tanpa Perkuatan</span>
+              </div>
+            </div>
+          </div>
+
+        </div>
+      </div>
+
+    </section>
+
+
   </main>
   <!-- FLOATING CHATBOT DRAWER (QUICK ACCESS AI) -->
   <div id="chatDrawer" class="chat-drawer closed fixed bottom-4 right-4 z-50 w-[95vw] sm:w-[390px] bg-slate-900 border border-amber-500/60 rounded-2xl shadow-2xl overflow-hidden font-mono flex flex-col no-print">
@@ -6268,7 +6915,8 @@
       tab13: '<i class="fa-solid fa-map-location-dot text-rose-400"></i> 13. Peta Spasial GIS',
       tab14: '<i class="fa-solid fa-layer-group text-amber-400"></i> 14. Peta Khusus Rekayasa Tambang & Decommissioning GIS',
       tab15: '<i class="fa-solid fa-file-signature text-amber-300"></i> 15. Berita Acara & Tim',
-      tab16: '<i class="fa-solid fa-robot text-emerald-400"></i> 16. AI Dam Assistant'
+      tab16: '<i class="fa-solid fa-robot text-emerald-400"></i> 16. AI Dam Assistant',
+      tab17: '<i class="fa-solid fa-mountain text-cyan-400"></i> 17. Stabilitas 3D &amp; Rembesan Dam 1'
     },
     en: {
       headerSubtitle: "O&M STANDARDS: PUPR REG 27/2015, ESDM DECREE 1827/2018, SNI 1726 & GISTM 2020",
@@ -6296,7 +6944,8 @@
       tab13: '<i class="fa-solid fa-map-location-dot text-rose-400"></i> 13. GIS Spatial Map',
       tab14: '<i class="fa-solid fa-layer-group text-amber-400"></i> 14. Special Mining Engineering & Decommissioning GIS',
       tab15: '<i class="fa-solid fa-file-signature text-amber-300"></i> 15. Official Report & Team',
-      tab16: '<i class="fa-solid fa-robot text-emerald-400"></i> 16. AI Dam Assistant'
+      tab16: '<i class="fa-solid fa-robot text-emerald-400"></i> 16. AI Dam Assistant',
+      tab17: '<i class="fa-solid fa-mountain text-cyan-400"></i> 17. 3D Stability &amp; Seepage Dam 1'
     }
   };
 
@@ -6325,7 +6974,8 @@
       btnTabSchedule: d.tab4, btnTabMonitoring: d.tab5, btnTabAnalisis: d.tab6,
       btnTabWeather: d.tab7, btnTabClimate: d.tab8, btnTabGev: d.tab9,
       btnTabFlood: d.tab10, btnTabQaqc: d.tab11, btnTabSeismic: d.tab12,
-      btnTabMap: d.tab13, btnTabSpecialGis: d.tab14, btnTabReport: d.tab15, btnTabChatbot: d.tab16
+      btnTabMap: d.tab13, btnTabSpecialGis: d.tab14, btnTabReport: d.tab15, btnTabChatbot: d.tab16,
+      btnTabDam1Stabilitas: d.tab17
     };
 
     for (const [id, val] of Object.entries(tabMap)) {
@@ -7262,7 +7912,16 @@
         if (seismicMiniMapInstance) seismicMiniMapInstance.invalidateSize(true);
       }, 450);
     }
-    if (tabId === 'tabQaqc') {
+    
+    if (tabId === 'tabDam1Stabilitas') {
+      setTimeout(() => {
+        if (!dam1ThreeInitialized) initDam13DViewer();
+        else if (dam1Renderer && dam1Camera) {
+          onDam1WindowResize();
+        }
+      }, 150);
+    }
+if (tabId === 'tabQaqc') {
       renderQaqcLog();
     }
   }
@@ -9996,6 +10655,31 @@ function speakSeismicSummary() {
 
   function evaluateInternalResponse(query) {
     const q = query.toLowerCase();
+
+    if (q.includes('bendungan 1') || q.includes('tujuh bukit 1') || q.includes('dam 1') || q.includes('spencer') || q.includes('makdisi') || q.includes('zona a') || q.includes('zona c') || q.includes('obe') || q.includes('mde')) {
+      return {
+        isInternal: true,
+        html: `
+          <div class="space-y-2 font-mono text-xs">
+            <div class="flex items-center justify-between border-b border-cyan-500/40 pb-1">
+              <span class="text-cyan-400 font-bold font-tech text-xs"><i class="fa-solid fa-mountain mr-1.5"></i> EVALUASI STABILITAS BENDUNGAN 1 TUJUH BUKIT</span>
+              <span class="px-2 py-0.5 rounded bg-cyan-950 text-cyan-300 text-[9px] font-bold">JURNAL TERAPAN</span>
+            </div>
+            <p class="text-slate-200 text-[11px] leading-relaxed">
+              Berdasarkan hasil studi geoteknik PT BSI &amp; PT Merdeka Copper Gold pada Bendungan 1 Tujuh Bukit (H = 11.5 m, Elev Puncak 20.5 m, Talud 1:3):
+            </p>
+            <ul class="text-[10px] text-slate-300 space-y-1 bg-slate-950 p-2.5 rounded-xl border border-slate-800">
+              <li>&bull; <b class="text-emerald-400">Kondisi Statis:</b> Hulu SF = 4.210 &gt; 1.50 (OK); Hilir SF = 1.959 &gt; 1.50 (OK); Rapid Drawdown SF = 2.262 (Hulu) &amp; 1.969 (Hilir).</li>
+              <li>&bull; <b class="text-cyan-300">Gempa OBE (0.19g, T=100 thn):</b> SF = 1.239 s.d. 3.308 &ge; 1.20 (Seluruh titik OK).</li>
+              <li>&bull; <b class="text-amber-300">Gempa MDE (0.52g, T=5000 thn):</b> Hulu SF = 1.103 - 1.971 (&gt;1.00); Hilir Y/h=1.00 SF = 0.889.</li>
+              <li>&bull; <b class="text-purple-300">Deformasi Makdisi-Seed:</b> Perpindahan tetap pasca-gempa MDE hanya <b>5.0 cm</b> (Batas izin 50% tinggi jagaan = 200 cm) &rarr; Status AMAN.</li>
+              <li>&bull; <b class="text-blue-300">Keamanan Rembesan:</b> Tekanan uplift SF = 1.547 (&ge;1.50); Erosi buluh piping Zona A SF = 4.23 &amp; Kaki Hilir SF = 3.07 (&ge;3.00) &rarr; Seluruhnya AMAN.</li>
+            </ul>
+          </div>
+        `
+      };
+    }
+
     if (q.includes('dam 5') || q.includes('dam 6') || q.includes('decommissioning') || q.includes('pengerukan') || q.includes('mud removal') || q.includes('penghapusan fungsi')) {
       return {
         isInternal: true,
@@ -10521,7 +11205,943 @@ function speakSeismicSummary() {
   }
 
   // ==================== 20. INITIALIZATION ON DOM LOAD ====================
-  window.addEventListener('DOMContentLoaded', () => {
+  
+
+// ==================== TAB 17: JAVASCRIPT ENGINE FOR DAM 1 TUJUH BUKIT 3D ====================
+let dam1Scene, dam1Camera, dam1Renderer, dam1Controls;
+let dam1Group, dam1SlipGroup, dam1SeepageGroup, dam1DimensionGroup, dam1PiezoGroup;
+let dam1SeepageParticles = [];
+let dam1StreamCurves = [];
+let dam1ThreeInitialized = false;
+let isDam1AnimationActive = true;
+let isDam1SlipCircleVisible = true;
+let isDam1SeepageActive = true;
+let isDam1DimensionsVisible = true;
+let currentDam1ControlMode = 'rotate';
+let currentDam1SlopeSide = 'hilir'; // 'hilir' or 'hulu'
+let currentDam1Condition = 'static_steady';
+
+// K-Factors lookup from journal tables 6 & 7 based on Y/h
+const DAM1_OBE_K = { 0.25: 0.272, 0.50: 0.227, 0.75: 0.207, 1.00: 0.187 };
+const DAM1_MDE_K = { 0.25: 0.583, 0.50: 0.486, 0.75: 0.443, 1.00: 0.400 };
+
+// Table 5, 6, 7 exact Safety Factors from journal
+const DAM1_JOURNAL_SF = {
+  static_steady: { hulu: 4.210, hilir: 1.959, req: 1.50 },
+  static_drawdown: { hulu: 2.262, hilir: 1.969, req: 1.30 },
+  obe_seismic: {
+    hulu: { 0.25: 3.308, 0.50: 2.754, 0.75: 2.406, 1.00: 1.749 },
+    hilir: { 0.25: 3.134, 0.50: 2.225, 0.75: 1.753, 1.00: 1.239 },
+    req: 1.20
+  },
+  mde_seismic: {
+    hulu: { 0.25: 1.971, 0.50: 1.682, 0.75: 1.490, 1.00: 1.103 },
+    hilir: { 0.25: 1.917, 0.50: 1.484, 0.75: 1.219, 1.00: 0.889 },
+    req: 1.00
+  },
+  makdisi_seed: {
+    deform_hilir_100: 5.0, // cm
+    allowable: 200.0 // 0.5 * 400 cm freeboard
+  }
+};
+
+function initDam13DViewer() {
+  if (dam1ThreeInitialized) return;
+  const container = document.getElementById('dam13DContainer');
+  if (!container || typeof THREE === 'undefined') return;
+
+  const w = container.clientWidth || 550;
+  const h = container.clientHeight || 450;
+
+  dam1Scene = new THREE.Scene();
+  dam1Scene.background = new THREE.Color(0x020714);
+
+  dam1Camera = new THREE.PerspectiveCamera(45, w / h, 0.5, 1500);
+  dam1Camera.position.set(70, 38, 85);
+
+  dam1Renderer = new THREE.WebGLRenderer({ antialias: true, alpha: true });
+  dam1Renderer.setSize(w, h);
+  dam1Renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
+  dam1Renderer.shadowMap.enabled = true;
+  container.innerHTML = '';
+  container.appendChild(dam1Renderer.domElement);
+
+  // Setup OrbitControls with safe check / fallback
+  if (THREE.OrbitControls) {
+    dam1Controls = new THREE.OrbitControls(dam1Camera, dam1Renderer.domElement);
+    dam1Controls.enableDamping = true;
+    dam1Controls.dampingFactor = 0.06;
+    dam1Controls.target.set(5, 5, 0);
+    dam1Controls.screenSpacePanning = true;
+    dam1Controls.enablePan = true;
+    dam1Controls.enableRotate = true;
+    dam1Controls.enableZoom = true;
+    dam1Controls.minDistance = 5;
+    dam1Controls.maxDistance = 600;
+    dam1Controls.minPolarAngle = 0;
+    dam1Controls.maxPolarAngle = Math.PI;
+    dam1Controls.panSpeed = 1.2;
+    dam1Controls.rotateSpeed = 1.0;
+  } else {
+    // Basic mouse drag fallback if OrbitControls not available
+    let isDragging = false;
+    let prevMouse = { x: 0, y: 0 };
+    container.addEventListener('mousedown', (e) => { isDragging = true; prevMouse = { x: e.clientX, y: e.clientY }; });
+    window.addEventListener('mouseup', () => isDragging = false);
+    window.addEventListener('mousemove', (e) => {
+      if (!isDragging || !dam1Scene) return;
+      const dx = e.clientX - prevMouse.x;
+      const dy = e.clientY - prevMouse.y;
+      if (currentDam1ControlMode === 'rotate') {
+        dam1Camera.position.x += dx * 0.2;
+        dam1Camera.position.y -= dy * 0.2;
+      } else {
+        dam1Camera.position.x -= dx * 0.3;
+        dam1Camera.position.y += dy * 0.3;
+      }
+      prevMouse = { x: e.clientX, y: e.clientY };
+    });
+  }
+
+  // Lighting
+  dam1Scene.add(new THREE.AmbientLight(0xffffff, 0.75));
+
+  const sunLight = new THREE.DirectionalLight(0xffffff, 1.4);
+  sunLight.position.set(60, 90, 70);
+  dam1Scene.add(sunLight);
+
+  const fillLight = new THREE.DirectionalLight(0x06b6d4, 0.7);
+  fillLight.position.set(-60, 30, -50);
+  dam1Scene.add(fillLight);
+
+  const bottomLight = new THREE.PointLight(0xa855f7, 1.5, 120);
+  bottomLight.position.set(0, -12, 10);
+  dam1Scene.add(bottomLight);
+
+  // Reference Ground Grid
+  const grid = new THREE.GridHelper(200, 40, 0x1e293b, 0x09142b);
+  grid.position.y = -17.0;
+  dam1Scene.add(grid);
+
+  // Groups
+  dam1Group = new THREE.Group();
+  dam1Scene.add(dam1Group);
+
+  dam1SlipGroup = new THREE.Group();
+  dam1Scene.add(dam1SlipGroup);
+
+  dam1SeepageGroup = new THREE.Group();
+  dam1Scene.add(dam1SeepageGroup);
+
+  dam1DimensionGroup = new THREE.Group();
+  dam1Scene.add(dam1DimensionGroup);
+
+  dam1PiezoGroup = new THREE.Group();
+  dam1Scene.add(dam1PiezoGroup);
+
+  window.addEventListener('resize', onDam1WindowResize);
+  buildDam13DGeometry();
+  updateDam1StabilitySimulation();
+  dam1ThreeInitialized = true;
+  animateDam13D();
+}
+
+function onDam1WindowResize() {
+  const container = document.getElementById('dam13DContainer');
+  if (!container || !dam1Camera || !dam1Renderer) return;
+  const w = container.clientWidth || 550;
+  const h = container.clientHeight || 450;
+  dam1Camera.aspect = w / h;
+  dam1Camera.updateProjectionMatrix();
+  dam1Renderer.setSize(w, h);
+}
+
+function setDam1ControlMode(mode) {
+  currentDam1ControlMode = mode;
+  const btnRot = document.getElementById('btnDam1ModeRotate');
+  const btnPan = document.getElementById('btnDam1ModePan');
+  const guide = document.getElementById('lblDam1MouseGuide');
+
+  if (mode === 'pan') {
+    if (btnPan) btnPan.className = "px-2.5 py-1 rounded text-[10px] font-mono font-bold cursor-pointer btn-toggle-active-dam1 transition-all";
+    if (btnRot) btnRot.className = "px-2.5 py-1 rounded text-[10px] font-mono font-bold cursor-pointer bg-slate-900 border border-slate-700 text-slate-400 hover:border-slate-500 transition-all";
+    if (guide) guide.innerText = "Mode Geser: Drag Kiri Geser Bebas (Pan) | Drag Kanan Putar | Scroll Zoom";
+    if (dam1Controls) {
+      dam1Controls.mouseButtons = {
+        LEFT: THREE.MOUSE.PAN,
+        MIDDLE: THREE.MOUSE.DOLLY,
+        RIGHT: THREE.MOUSE.ROTATE
+      };
+    }
+  } else {
+    if (btnRot) btnRot.className = "px-2.5 py-1 rounded text-[10px] font-mono font-bold cursor-pointer btn-toggle-active-dam1 transition-all";
+    if (btnPan) btnPan.className = "px-2.5 py-1 rounded text-[10px] font-mono font-bold cursor-pointer bg-slate-900 border border-slate-700 text-slate-400 hover:border-slate-500 transition-all";
+    if (guide) guide.innerText = "Mode Putar: Drag Kiri Putar 360° | Drag Kanan Geser Bebas | Scroll Zoom";
+    if (dam1Controls) {
+      dam1Controls.mouseButtons = {
+        LEFT: THREE.MOUSE.ROTATE,
+        MIDDLE: THREE.MOUSE.DOLLY,
+        RIGHT: THREE.MOUSE.PAN
+      };
+    }
+  }
+}
+
+function panDam1Camera(dx, dy) {
+  if (!dam1Camera) return;
+  const factor = 1.4;
+  const forward = new THREE.Vector3();
+  dam1Camera.getWorldDirection(forward);
+  const right = new THREE.Vector3().crossVectors(forward, dam1Camera.up).normalize();
+  const up = dam1Camera.up.clone().normalize();
+
+  const offset = new THREE.Vector3()
+    .addScaledVector(right, dx * factor)
+    .addScaledVector(up, dy * factor);
+
+  dam1Camera.position.add(offset);
+  if (dam1Controls) {
+    dam1Controls.target.add(offset);
+    dam1Controls.update();
+  }
+}
+
+function zoomDam1Camera(dz) {
+  if (!dam1Camera) return;
+  const forward = new THREE.Vector3();
+  dam1Camera.getWorldDirection(forward);
+  dam1Camera.position.addScaledVector(forward, -dz * 0.8);
+  if (dam1Controls) dam1Controls.update();
+}
+
+function setDam1View(view) {
+  if (!dam1Camera) return;
+  if (view === 'iso') {
+    dam1Camera.position.set(70, 38, 85);
+    if (dam1Controls) dam1Controls.target.set(5, 5, 0);
+  } else if (view === 'side') {
+    dam1Camera.position.set(0, 10, 125);
+    if (dam1Controls) dam1Controls.target.set(0, 5, 0);
+  } else if (view === 'front') {
+    dam1Camera.position.set(125, 12, 0);
+    if (dam1Controls) dam1Controls.target.set(0, 5, 0);
+  } else if (view === 'top') {
+    dam1Camera.position.set(0, 135, 0.1);
+    if (dam1Controls) dam1Controls.target.set(0, 0, 0);
+  }
+  if (dam1Controls) dam1Controls.update();
+}
+
+function resetDam13DView() {
+  setDam1View('iso');
+  setDam1ControlMode('rotate');
+}
+
+function toggleDam1Animation() {
+  isDam1AnimationActive = !isDam1AnimationActive;
+  const lbl = document.getElementById('lblDam1SeepToggle');
+  if (lbl) lbl.innerText = isDam1AnimationActive ? "REMBESAN: PLAY" : "REMBESAN: PAUSE";
+}
+
+function toggleDam1SlipCircle() {
+  isDam1SlipCircleVisible = !isDam1SlipCircleVisible;
+  if (dam1SlipGroup) dam1SlipGroup.visible = isDam1SlipCircleVisible;
+  const lbl = document.getElementById('lblDam1SlipToggle');
+  if (lbl) lbl.innerText = isDam1SlipCircleVisible ? "SLIP ARC: ON" : "SLIP ARC: OFF";
+}
+
+function toggleDam1Seepage() {
+  isDam1SeepageActive = !isDam1SeepageActive;
+  if (dam1SeepageGroup) dam1SeepageGroup.visible = isDam1SeepageActive;
+  const lbl = document.getElementById('lblDam1SeepToggle');
+  if (lbl) lbl.innerText = isDam1SeepageActive ? "REMBESAN: PLAY" : "REMBESAN: OFF";
+}
+
+function toggleDam1Dimensions() {
+  isDam1DimensionsVisible = !isDam1DimensionsVisible;
+  if (dam1DimensionGroup) dam1DimensionGroup.visible = isDam1DimensionsVisible;
+  const lbl = document.getElementById('lblDam1DimToggle');
+  if (lbl) lbl.innerText = isDam1DimensionsVisible ? "DIMENSI: ON" : "DIMENSI: OFF";
+}
+
+function setDam1SlopeSide(side) {
+  currentDam1SlopeSide = side;
+  const bHilir = document.getElementById('btnDam1SlopeHilir');
+  const bHulu = document.getElementById('btnDam1SlopeHulu');
+  if (side === 'hilir') {
+    if (bHilir) bHilir.className = "py-1 px-2 rounded bg-cyan-950 border border-cyan-500 text-cyan-300 font-bold text-[10px] text-center shadow";
+    if (bHulu) bHulu.className = "py-1 px-2 rounded bg-slate-900 border border-slate-700 text-slate-400 font-bold text-[10px] text-center hover:text-white";
+  } else {
+    if (bHulu) bHulu.className = "py-1 px-2 rounded bg-cyan-950 border border-cyan-500 text-cyan-300 font-bold text-[10px] text-center shadow";
+    if (bHilir) bHilir.className = "py-1 px-2 rounded bg-slate-900 border border-slate-700 text-slate-400 font-bold text-[10px] text-center hover:text-white";
+  }
+  updateDam1StabilitySimulation();
+}
+
+function setDam1Condition(cond) {
+  currentDam1Condition = cond;
+  const sliderHu = document.getElementById('slider_dam1_hu');
+  const sliderPga = document.getElementById('slider_dam1_pga');
+  const sliderYh = document.getElementById('slider_dam1_yh');
+
+  if (cond === 'static_steady') {
+    if (sliderHu) sliderHu.value = 19.45;
+    if (sliderPga) sliderPga.value = 0.00;
+  } else if (cond === 'static_drawdown') {
+    if (sliderHu) sliderHu.value = 13.5;
+    if (sliderPga) sliderPga.value = 0.00;
+  } else if (cond === 'obe_seismic') {
+    if (sliderHu) sliderHu.value = 19.45;
+    if (sliderPga) sliderPga.value = 0.19;
+    if (sliderYh) sliderYh.value = 1.00;
+  } else if (cond === 'mde_seismic') {
+    if (sliderHu) sliderHu.value = 19.45;
+    if (sliderPga) sliderPga.value = 0.52;
+    if (sliderYh) sliderYh.value = 1.00;
+  } else if (cond === 'makdisi_seed') {
+    if (sliderHu) sliderHu.value = 19.45;
+    if (sliderPga) sliderPga.value = 0.52;
+    if (sliderYh) sliderYh.value = 1.00;
+    setDam1SlopeSide('hilir');
+  } else if (cond === 'seepage_flow') {
+    if (sliderHu) sliderHu.value = 19.45;
+    if (sliderPga) sliderPga.value = 0.00;
+    isDam1SeepageActive = true;
+    if (dam1SeepageGroup) dam1SeepageGroup.visible = true;
+  }
+
+  updateDam1StabilitySimulation();
+}
+
+// BUILD THREE.JS GEOMETRY FOR DAM 1 TUJUH BUKIT
+function buildDam13DGeometry() {
+  if (!dam1Group) return;
+
+  while(dam1Group.children.length > 0) dam1Group.remove(dam1Group.children[0]);
+  while(dam1SlipGroup.children.length > 0) dam1SlipGroup.remove(dam1SlipGroup.children[0]);
+  while(dam1SeepageGroup.children.length > 0) dam1SeepageGroup.remove(dam1SeepageGroup.children[0]);
+  while(dam1DimensionGroup.children.length > 0) dam1DimensionGroup.remove(dam1DimensionGroup.children[0]);
+  while(dam1PiezoGroup.children.length > 0) dam1PiezoGroup.remove(dam1PiezoGroup.children[0]);
+  dam1SeepageParticles = [];
+  dam1StreamCurves = [];
+
+  const hd = 11.5; // Tinggi Bendungan dari dasar 9.0m ke puncak 20.5m
+  const crestW = 10.0;
+  const slope = 3.0; // 1V : 3H
+  const rawHu = parseFloat(document.getElementById('slider_dam1_hu')?.value) || 19.45;
+  const hu = Math.max(0.5, Math.min(hd - 0.2, rawHu - 9.0)); // depth above 9.0m
+
+  const upToeX = -(crestW / 2.0 + hd * slope); // -39.5m
+  const downToeX = (crestW / 2.0 + hd * slope); // +39.5m
+  const totalBaseW = downToeX - upToeX; // 79.0m
+  const damLengthZ = 60.0;
+  const extrudeSettings = { depth: damLengthZ, bevelEnabled: false };
+
+  // 1. TIGA LAPISAN FONDASI GEOLOGI (ELEV 9m ke -8m)
+  // Layer 1: Colluvial Clay (Y: 0 ke -9.0m)
+  const f1Width = totalBaseW * 1.5;
+  const f1Geo = new THREE.BoxGeometry(f1Width, 9.0, damLengthZ);
+  const f1Mat = new THREE.MeshStandardMaterial({ color: 0x475569, roughness: 0.85, metalness: 0.1 });
+  const f1Mesh = new THREE.Mesh(f1Geo, f1Mat);
+  f1Mesh.position.set(0, -4.5, 0);
+  dam1Group.add(f1Mesh);
+  dam1Group.add(new THREE.LineSegments(new THREE.EdgesGeometry(f1Geo), new THREE.LineBasicMaterial({ color: 0x64748b })));
+
+  // Layer 2: Weathered Diorite (Y: -9.0 ke -13.0m)
+  const f2Geo = new THREE.BoxGeometry(f1Width, 4.0, damLengthZ);
+  const f2Mat = new THREE.MeshStandardMaterial({ color: 0x334155, roughness: 0.75, metalness: 0.2 });
+  const f2Mesh = new THREE.Mesh(f2Geo, f2Mat);
+  f2Mesh.position.set(0, -11.0, 0);
+  dam1Group.add(f2Mesh);
+
+  // Layer 3: Fresh Diorite (Y: -13.0 ke -17.0m)
+  const f3Geo = new THREE.BoxGeometry(f1Width, 4.0, damLengthZ);
+  const f3Mat = new THREE.MeshStandardMaterial({ color: 0x1e293b, roughness: 0.5, metalness: 0.35 });
+  const f3Mesh = new THREE.Mesh(f3Geo, f3Mat);
+  f3Mesh.position.set(0, -15.0, 0);
+  dam1Group.add(f3Mesh);
+
+  // 2. TUBUH BENDUNGAN 1 (ZONA A CORE & ZONA C SHELL)
+  // A. Zona A (Inti Lempung Kedap Air Hulu)
+  const coreShape = new THREE.Shape();
+  coreShape.moveTo(-28.0, 0);
+  coreShape.lineTo(-crestW / 2.0, hd);
+  coreShape.lineTo(1.5, hd);
+  coreShape.lineTo(8.0, 0);
+  coreShape.closePath();
+
+  const coreGeo = new THREE.ExtrudeGeometry(coreShape, extrudeSettings);
+  const coreMat = new THREE.MeshStandardMaterial({ color: 0xb45309, roughness: 0.6, metalness: 0.1, transparent: true, opacity: 0.92 });
+  const coreMesh = new THREE.Mesh(coreGeo, coreMat);
+  coreMesh.position.z = -damLengthZ / 2;
+  dam1Group.add(coreMesh);
+  dam1Group.add(new THREE.LineSegments(new THREE.EdgesGeometry(coreGeo), new THREE.LineBasicMaterial({ color: 0xf59e0b })));
+
+  // B. Zona C (Shell Urukan Stabilitas Hilir & Hulu)
+  const shellShape = new THREE.Shape();
+  shellShape.moveTo(upToeX, 0);
+  shellShape.lineTo(-28.0, 0);
+  shellShape.lineTo(-crestW / 2.0, hd);
+  shellShape.lineTo(crestW / 2.0, hd);
+  shellShape.lineTo(downToeX, 0);
+  shellShape.lineTo(8.0, 0);
+  shellShape.lineTo(1.5, hd);
+  shellShape.lineTo(-crestW / 2.0, hd);
+  shellShape.closePath();
+
+  const shellGeo = new THREE.ExtrudeGeometry(shellShape, extrudeSettings);
+  const shellMat = new THREE.MeshStandardMaterial({ color: 0x64748b, roughness: 0.8, metalness: 0.15, transparent: true, opacity: 0.82 });
+  const shellMesh = new THREE.Mesh(shellGeo, shellMat);
+  shellMesh.position.z = -damLengthZ / 2;
+  dam1Group.add(shellMesh);
+  dam1Group.add(new THREE.LineSegments(new THREE.EdgesGeometry(shellGeo), new THREE.LineBasicMaterial({ color: 0x94a3b8 })));
+
+  // 3. AIR WADUK HULU (RESERVOIR WATER)
+  const waterToeX = upToeX - 25;
+  const waterSlopeX = -crestW / 2.0 - (hd - hu) * slope;
+  const waterShape = new THREE.Shape();
+  waterShape.moveTo(waterToeX, 0);
+  waterShape.lineTo(waterToeX, hu);
+  waterShape.lineTo(waterSlopeX, hu);
+  waterShape.lineTo(upToeX, 0);
+  waterShape.closePath();
+
+  const waterGeo = new THREE.ExtrudeGeometry(waterShape, extrudeSettings);
+  const waterMat = new THREE.MeshStandardMaterial({ color: 0x0284c7, roughness: 0.1, metalness: 0.3, transparent: true, opacity: 0.52 });
+  const waterMesh = new THREE.Mesh(waterGeo, waterMat);
+  waterMesh.position.z = -damLengthZ / 2;
+  dam1Group.add(waterMesh);
+
+  // 4. INSTRUMENTASI PIEZOMETER (TABEL 4)
+  // PZ1-01 at X = 20.0m (Head 16.56m -> Y = 7.56m)
+  createDam1Piezometer(20.0, 7.56, 11.5 - ((20.0 - 5.0) / 3.0), 'PZ1-01 (16.56m)');
+  // PZ2-02 at X = 4.0m (Head 19.25m -> Y = 10.25m)
+  createDam1Piezometer(4.0, 10.25, 11.5, 'PZ2-02 (19.25m)');
+
+  // 5. BIDANG GELINCIR KRITIS SPENCER (SLIP CIRCLE ARC)
+  buildDam1SlipCircleArc(downToeX, upToeX);
+
+  // 6. SEEPAGE PARTICLES & FLOW NET STREAMLINES
+  buildDam1SeepageStreamlines(waterSlopeX, hu, upToeX, downToeX, damLengthZ);
+
+  // 7. SINKRONISASI LABEL & DIMENSI BESAR 3D
+  buildDam1DimensionSprites(hd, rawHu, crestW, totalBaseW, upToeX, downToeX, damLengthZ);
+}
+
+function createDam1Piezometer(x, headY, surfaceY, label) {
+  const pipeGeo = new THREE.CylinderGeometry(0.35, 0.35, surfaceY + 6.0, 12);
+  const pipeMat = new THREE.MeshStandardMaterial({ color: 0x06b6d4, metalness: 0.7, roughness: 0.3 });
+  const pipe = new THREE.Mesh(pipeGeo, pipeMat);
+  pipe.position.set(x, (surfaceY - 6.0) / 2.0, 0);
+  dam1PiezoGroup.add(pipe);
+
+  const headGeo = new THREE.SphereGeometry(1.0, 16, 16);
+  const headMat = new THREE.MeshStandardMaterial({ color: 0x22d3ee, emissive: 0x0891b2, emissiveIntensity: 0.8 });
+  const head = new THREE.Mesh(headGeo, headMat);
+  head.position.set(x, headY, 0);
+  dam1PiezoGroup.add(head);
+
+  const sprite = makeDam1TextSprite(`📍 ${label}`, 0x22d3ee, true);
+  sprite.position.set(x, surfaceY + 3.0, 0);
+  dam1PiezoGroup.add(sprite);
+}
+
+function buildDam1SlipCircleArc(downToeX, upToeX) {
+  const isHilir = (currentDam1SlopeSide === 'hilir');
+  const arcPts = [];
+  const p1 = isHilir ? new THREE.Vector3(4.5, 11.5, 0) : new THREE.Vector3(-4.5, 11.5, 0);
+  const p2 = isHilir ? new THREE.Vector3(20.0, -2.5, 0) : new THREE.Vector3(-20.0, -2.5, 0);
+  const p3 = isHilir ? new THREE.Vector3(downToeX, 0.0, 0) : new THREE.Vector3(upToeX, 0.0, 0);
+
+  const curve = new THREE.CatmullRomCurve3([p1, p2, p3]);
+  const tubeGeo = new THREE.TubeGeometry(curve, 30, 0.65, 8, false);
+
+  let arcColor = 0x10b981;
+  const currentSf = getCurrentDam1SfValue();
+  if (currentSf < 1.0) arcColor = 0xf43f5e;
+  else if (currentSf < 1.3) arcColor = 0xf59e0b;
+
+  const tubeMat = new THREE.MeshStandardMaterial({
+    color: arcColor,
+    emissive: arcColor,
+    emissiveIntensity: 0.6,
+    metalness: 0.3
+  });
+  const arcMesh = new THREE.Mesh(tubeGeo, tubeMat);
+  dam1SlipGroup.add(arcMesh);
+
+  // Slices Visualization (10 vertical slices)
+  const numSlices = 10;
+  for (let s = 1; s < numSlices; s++) {
+    const t = s / numSlices;
+    const pt = curve.getPoint(t);
+    const topY = isHilir ? 11.5 - ((pt.x - 5.0) / 3.0) : 11.5 - ((-pt.x - 5.0) / 3.0);
+    const sliceLineGeo = new THREE.BufferGeometry().setFromPoints([
+      new THREE.Vector3(pt.x, pt.y, 0),
+      new THREE.Vector3(pt.x, Math.max(pt.y, topY), 0)
+    ]);
+    const sliceLineMat = new THREE.LineDashedMaterial({ color: 0xfbbf24, dashSize: 0.5, gapSize: 0.3 });
+    const line = new THREE.Line(sliceLineGeo, sliceLineMat);
+    line.computeLineDistances();
+    dam1SlipGroup.add(line);
+  }
+
+  // Label Sprite on Critical Arc
+  const midPt = curve.getPoint(0.5);
+  const sfLabel = makeDam1TextSprite(`SF = ${currentSf.toFixed(3)} (${isHilir ? 'Hilir' : 'Hulu'})`, arcColor, true);
+  sfLabel.position.set(midPt.x, midPt.y - 2.5, 0);
+  dam1SlipGroup.add(sfLabel);
+}
+
+function buildDam1SeepageStreamlines(waterSlopeX, hu, upToeX, downToeX, damLengthZ) {
+  const pts1 = [
+    new THREE.Vector3(waterSlopeX, hu * 0.85, 0),
+    new THREE.Vector3(-15.0, hu * 0.65, 0),
+    new THREE.Vector3(-2.0, hu * 0.45, 0),
+    new THREE.Vector3(12.0, 3.5, 0),
+    new THREE.Vector3(downToeX - 2.0, 0.8, 0)
+  ];
+  const pts2 = [
+    new THREE.Vector3(upToeX + 5.0, hu * 0.5, 0),
+    new THREE.Vector3(-18.0, 2.0, 0),
+    new THREE.Vector3(0.0, -1.0, 0),
+    new THREE.Vector3(18.0, 1.2, 0),
+    new THREE.Vector3(downToeX - 2.0, 0.5, 0)
+  ];
+  const pts3 = [
+    new THREE.Vector3(upToeX - 5.0, 0.5, 0),
+    new THREE.Vector3(-10.0, -3.5, 0),
+    new THREE.Vector3(10.0, -3.0, 0),
+    new THREE.Vector3(downToeX - 1.0, -0.2, 0)
+  ];
+
+  dam1StreamCurves = [
+    new THREE.CatmullRomCurve3(pts1),
+    new THREE.CatmullRomCurve3(pts2),
+    new THREE.CatmullRomCurve3(pts3)
+  ];
+
+  dam1StreamCurves.forEach(curve => {
+    const tubeGeo = new THREE.TubeGeometry(curve, 35, 0.35, 8, false);
+    const tubeMat = new THREE.MeshBasicMaterial({ color: 0x38bdf8, transparent: true, opacity: 0.65 });
+    dam1SeepageGroup.add(new THREE.Mesh(tubeGeo, tubeMat));
+  });
+
+  const zSlices = [-15, -5, 5, 15];
+  const countPerStream = 16;
+  zSlices.forEach(z => {
+    dam1StreamCurves.forEach(curve => {
+      for (let i = 0; i < countPerStream; i++) {
+        const pMesh = new THREE.Mesh(
+          new THREE.SphereGeometry(0.38, 8, 8),
+          new THREE.MeshBasicMaterial({ color: 0x00ffff })
+        );
+        dam1SeepageGroup.add(pMesh);
+        dam1SeepageParticles.push({
+          mesh: pMesh,
+          curve: curve,
+          t: (i / countPerStream) + Math.random() * 0.05,
+          speed: 0.0035 + Math.random() * 0.002,
+          zOffset: z + (Math.random() - 0.5) * 2.0
+        });
+      }
+    });
+  });
+}
+
+function buildDam1DimensionSprites(hd, rawHu, crestW, totalBaseW, upToeX, downToeX, damLengthZ) {
+  const dimZ = damLengthZ / 2.0 + 2.5;
+
+  // 1. Tinggi Bendungan Hd
+  createDam1DimensionLine(
+    new THREE.Vector3(downToeX + 8.0, 0, dimZ),
+    new THREE.Vector3(downToeX + 8.0, hd, dimZ),
+    0xf59e0b, `Hd = ${hd.toFixed(1)} M`, 'right'
+  );
+
+  // 2. Muka Air Normal Hu
+  createDam1DimensionLine(
+    new THREE.Vector3(upToeX - 10.0, 0, dimZ),
+    new THREE.Vector3(upToeX - 10.0, rawHu - 9.0, dimZ),
+    0x06b6d4, `Hu = ${rawHu.toFixed(2)} M DPL`, 'left'
+  );
+
+  // 3. Lebar Mercu Cw
+  createDam1DimensionLine(
+    new THREE.Vector3(-crestW / 2.0, hd + 3.0, dimZ),
+    new THREE.Vector3(crestW / 2.0, hd + 3.0, dimZ),
+    0x10b981, `Cw = ${crestW.toFixed(1)} M`, 'top'
+  );
+
+  // 4. Lebar Dasar B
+  createDam1DimensionLine(
+    new THREE.Vector3(upToeX, -4.0, dimZ),
+    new THREE.Vector3(downToeX, -4.0, dimZ),
+    0x94a3b8, `B = ${totalBaseW.toFixed(1)} M`, 'bottom'
+  );
+
+  // 5. Kemiringan Talud Upstream & Downstream 1:3
+  const spriteSlopeUp = makeDam1TextSprite("Kemiringan 1 : 3", 0x38bdf8, false);
+  spriteSlopeUp.position.set((upToeX - 5.0) / 2.0, hd / 2.0 + 2.0, dimZ);
+  dam1DimensionGroup.add(spriteSlopeUp);
+
+  const spriteSlopeDown = makeDam1TextSprite("Kemiringan 1 : 3", 0x38bdf8, false);
+  spriteSlopeDown.position.set((downToeX + 5.0) / 2.0, hd / 2.0 + 2.0, dimZ);
+  dam1DimensionGroup.add(spriteSlopeDown);
+}
+
+function createDam1DimensionLine(p1, p2, colorHex, label, orientation) {
+  const lineGeo = new THREE.BufferGeometry().setFromPoints([p1, p2]);
+  const lineMat = new THREE.LineBasicMaterial({ color: colorHex, linewidth: 2.5 });
+  dam1DimensionGroup.add(new THREE.Line(lineGeo, lineMat));
+
+  const mid = new THREE.Vector3().addVectors(p1, p2).multiplyScalar(0.5);
+  if (orientation === 'right') mid.x += 5.5;
+  else if (orientation === 'left') mid.x -= 5.5;
+  else if (orientation === 'top') mid.y += 2.5;
+  else if (orientation === 'bottom') mid.y -= 2.5;
+
+  const sprite = makeDam1TextSprite(label, colorHex, false);
+  sprite.position.copy(mid);
+  dam1DimensionGroup.add(sprite);
+}
+
+function makeDam1TextSprite(message, colorHex, isBadge = false) {
+  const canvas = document.createElement('canvas');
+  canvas.width = 1024;
+  canvas.height = 256;
+  const ctx = canvas.getContext('2d');
+  const hexStr = '#' + ('000000' + colorHex.toString(16)).slice(-6);
+
+  ctx.fillStyle = 'rgba(3, 7, 18, 0.94)';
+  ctx.strokeStyle = hexStr;
+  ctx.lineWidth = 6;
+  ctx.beginPath();
+  ctx.roundRect(16, 20, 992, 216, 36);
+  ctx.fill();
+  ctx.stroke();
+
+  ctx.font = 'bold 72px "JetBrains Mono", "Orbitron", sans-serif';
+  ctx.fillStyle = hexStr;
+  ctx.textAlign = 'center';
+  ctx.textBaseline = 'middle';
+  ctx.shadowColor = hexStr;
+  ctx.shadowBlur = 12;
+  ctx.fillText(message, 512, 128);
+
+  const texture = new THREE.CanvasTexture(canvas);
+  texture.needsUpdate = true;
+  const spriteMat = new THREE.SpriteMaterial({ map: texture, transparent: true });
+  const sprite = new THREE.Sprite(spriteMat);
+  sprite.scale.set(isBadge ? 22 : 18, isBadge ? 5.5 : 4.5, 1);
+  return sprite;
+}
+
+function animateDam13D() {
+  requestAnimationFrame(animateDam13D);
+
+  if (isDam1AnimationActive && isDam1SeepageActive && dam1SeepageParticles.length > 0) {
+    dam1SeepageParticles.forEach(p => {
+      p.t += p.speed;
+      if (p.t > 1.0) p.t = 0.0;
+      const pos = p.curve.getPoint(p.t);
+      p.mesh.position.set(pos.x, pos.y, p.zOffset);
+    });
+  }
+
+  if (dam1Controls && typeof dam1Controls.update === 'function') {
+    dam1Controls.update();
+  }
+  if (dam1Renderer && dam1Scene && dam1Camera) {
+    dam1Renderer.render(dam1Scene, dam1Camera);
+  }
+}
+
+function getCurrentDam1SfValue() {
+  const isHilir = (currentDam1SlopeSide === 'hilir');
+  const yh = parseFloat(document.getElementById('slider_dam1_yh')?.value) || 1.00;
+
+  if (currentDam1Condition === 'static_steady') {
+    return isHilir ? DAM1_JOURNAL_SF.static_steady.hilir : DAM1_JOURNAL_SF.static_steady.hulu;
+  } else if (currentDam1Condition === 'static_drawdown') {
+    return isHilir ? DAM1_JOURNAL_SF.static_drawdown.hilir : DAM1_JOURNAL_SF.static_drawdown.hulu;
+  } else if (currentDam1Condition === 'obe_seismic') {
+    const table = isHilir ? DAM1_JOURNAL_SF.obe_seismic.hilir : DAM1_JOURNAL_SF.obe_seismic.hulu;
+    return table[yh] || (isHilir ? 1.239 : 1.749);
+  } else if (currentDam1Condition === 'mde_seismic' || currentDam1Condition === 'makdisi_seed') {
+    const table = isHilir ? DAM1_JOURNAL_SF.mde_seismic.hilir : DAM1_JOURNAL_SF.mde_seismic.hulu;
+    return table[yh] || (isHilir ? 0.889 : 1.103);
+  }
+  return isHilir ? 1.959 : 4.210;
+}
+
+function updateDam1StabilitySimulation() {
+  const rawHu = parseFloat(document.getElementById('slider_dam1_hu')?.value) || 19.45;
+  const pga = parseFloat(document.getElementById('slider_dam1_pga')?.value) || 0.19;
+  const yh = parseFloat(document.getElementById('slider_dam1_yh')?.value) || 1.00;
+
+  const lblHu = document.getElementById('lbl_dam1_hu');
+  if (lblHu) lblHu.innerText = rawHu.toFixed(2) + ' m';
+  const lblPga = document.getElementById('lbl_dam1_pga');
+  if (lblPga) lblPga.innerText = pga.toFixed(2) + ' g';
+
+  const kFactor = (pga >= 0.35) ? (DAM1_MDE_K[yh] || 0.400) : (DAM1_OBE_K[yh] || 0.187);
+  const lblYh = document.getElementById('lbl_dam1_yh');
+  if (lblYh) lblYh.innerText = `${yh.toFixed(2)} (K=${kFactor.toFixed(3)})`;
+
+  const kh = pga * kFactor;
+  const lblKh = document.getElementById('sim_dam1_kh_val');
+  if (lblKh) lblKh.innerText = `kh = ${kh.toFixed(3)}`;
+  const lblKFact = document.getElementById('sim_dam1_k_factor');
+  if (lblKFact) lblKFact.innerText = `K = ${kFactor.toFixed(3)}`;
+
+  const currentSf = getCurrentDam1SfValue();
+  const isHilir = (currentDam1SlopeSide === 'hilir');
+  let reqSf = 1.50;
+  if (currentDam1Condition === 'obe_seismic') reqSf = 1.20;
+  else if (currentDam1Condition === 'mde_seismic' || currentDam1Condition === 'makdisi_seed') reqSf = 1.00;
+  else if (currentDam1Condition === 'static_drawdown') reqSf = 1.30;
+
+  const isSafe = (currentSf >= reqSf);
+  const sfValEl = document.getElementById('sim_dam1_sf_val');
+  if (sfValEl) {
+    sfValEl.innerText = `SF = ${currentSf.toFixed(3)} ${isSafe ? '(AMAN)' : (currentDam1Condition === 'mde_seismic' ? '(CEK DEFORMASI)' : '(KRITIS)')}`;
+    sfValEl.className = isSafe ? "text-emerald-400 text-sm font-black font-mono" : "text-amber-400 text-sm font-black font-mono animate-pulse";
+  }
+
+  const sfSideEl = document.getElementById('sim_dam1_sf_side');
+  if (sfSideEl) {
+    sfSideEl.innerText = `${isHilir ? 'Lereng Hilir' : 'Lereng Hulu'} (Y/h=${yh.toFixed(2)})`;
+  }
+
+  const badgeCriteria = document.getElementById('badgeDam1SfCriteria');
+  if (badgeCriteria) {
+    badgeCriteria.innerText = `SYARAT > ${reqSf.toFixed(2)}`;
+  }
+
+  const hudSf = document.getElementById('lblDam1HudSf');
+  if (hudSf) hudSf.innerText = currentSf.toFixed(3);
+
+  // Deformasi Makdisi-Seed
+  const deformVal = (isHilir && yh === 1.00 && (currentDam1Condition === 'mde_seismic' || currentDam1Condition === 'makdisi_seed')) ? 5.0 : 0.0;
+  const deformEl = document.getElementById('sim_dam1_deform_val');
+  if (deformEl) deformEl.innerText = `${deformVal.toFixed(1)} cm < 200 cm`;
+
+  // Uplift & Piping (from journal calculations)
+  const upliftSf = (18.0 * 1.7193) / (10.0 * 2.0); // 1.547
+  const corePipingSf = 1.057 / 0.25; // 4.23
+  const toePipingSf = 0.92 / 0.30; // 3.07
+
+  const conclEl = document.getElementById('sim_dam1_conclusion');
+  if (conclEl) {
+    if (isSafe || (currentDam1Condition === 'mde_seismic' && deformVal < 200.0)) {
+      conclEl.innerHTML = `<span class="text-emerald-400 font-bold text-[10px]"><i class="fa-solid fa-circle-check"></i> AMAN TERVERIFIKASI (JURNAL TERAPAN).</span><br>Faktor Keamanan lereng (${isHilir ? 'Hilir' : 'Hulu'}) SF = <b>${currentSf.toFixed(3)}</b> memenuhi kriteria keselamatan (Syarat &gt; ${reqSf.toFixed(2)}). Pada kondisi gempa MDE maksimum sekalipun, perpindahan tetap Makdisi-Seed sebesar <b>5.0 cm</b> jauh lebih kecil dari batas izin 50% tinggi jagaan (200 cm). Stabilitas lereng dan keamanan rembesan Bendungan 1 Tujuh Bukit dinyatakan aman tanpa perlu perkuatan.`;
+    } else {
+      conclEl.innerHTML = `<span class="text-rose-400 font-bold text-[10px]"><i class="fa-solid fa-triangle-exclamation"></i> PERHATIAN KHUSUS.</span><br>Faktor Keamanan terhitung SF = <b>${currentSf.toFixed(3)}</b> berada di bawah batas persyaratan (${reqSf.toFixed(2)}). Evaluasi metode Makdisi-Seed atau penambahan counterweight berm disarankan.`;
+    }
+  }
+
+  buildDam13DGeometry();
+}
+
+function speakDam1StabilitySummary() {
+  if (!('speechSynthesis' in window)) {
+    showToast('Browser tidak mendukung Web Speech Audio', 'warning');
+    return;
+  }
+  const text = "Ringkasan evaluasi geoteknik Bendungan 1 Tujuh Bukit Banyuwangi: Lereng bendungan stabil dalam kondisi statik dengan faktor keamanan hulu 4.21 dan hilir 1.96. Pada kondisi gempa OBE diperoleh faktor keamanan 1.24 hingga 3.31. Pada gempa MDE, deformasi tetap metode Makdisi-Seed hanya 5 sentimeter, jauh di bawah batas izin 200 sentimeter. Analisis rembesan uplift aman dengan nilai 1.55, dan faktor keamanan erosi buluh piping adalah 4.23 dan 3.07. Seluruh struktur aman tanpa memerlukan perkuatan tambahan.";
+  window.speechSynthesis.cancel();
+  const utt = new SpeechSynthesisUtterance(text);
+  utt.lang = 'id-ID';
+  window.speechSynthesis.speak(utt);
+  showToast('Memutar narasi evaluasi stabilitas Bendungan 1...', 'info');
+}
+
+function exportDam1StabilityExcel() {
+  if (typeof XLSX === 'undefined') { showToast('Library Excel belum siap', 'error'); return; }
+  const wb = XLSX.utils.book_new();
+
+  const rowsT1 = [
+    ["DATA TEKNIS BENDUNGAN 1 TUJUH BUKIT BANYUWANGI"],
+    ["No", "Uraian Parameter", "Nilai", "Satuan"],
+    [1, "Elevasi Puncak Bendungan", 20.5, "m"],
+    [2, "Elevasi Muka Air Q1000 tahun", 20.0, "m"],
+    [3, "Elevasi Puncak Pelimpah (Spillway)", 19.0, "m"],
+    [4, "Elevasi Dasar Udik Downstream", 9.0, "m"],
+    [5, "Tinggi Maksimum Bendungan", 11.5, "m"],
+    [6, "Jagaan Normal (Normal Freeboard)", 1.5, "m"],
+    [7, "Jagaan Minimum (Min Freeboard)", 0.5, "m"],
+    [8, "Lebar Puncak Bendungan (Crest)", 10.0, "m"],
+    [9, "Bentang Bendungan (Span)", 400.0, "m"],
+    [10, "Volume Tampungan s/d Puncak Pelimpah", 389000, "m³"],
+    [11, "Volume Tampungan s/d Puncak Bendungan", 611000, "m³"],
+    [12, "Kemiringan Lereng Upstream (Hulu)", "1 : 3", "-"],
+    [13, "Kemiringan Lereng Downstream (Hilir)", "1 : 3", "-"],
+    [14, "Lebar Pelimpah (Spillway)", 5.0, "m"],
+    [15, "Kemiringan Talud Pelimpah", "1 : 7", "-"],
+    [16, "Luas Genangan Waduk", 161586, "m²"],
+    [17, "Luas Daerah Tangkapan Air (DTA)", 494700, "m²"]
+  ];
+  XLSX.utils.book_append_sheet(wb, XLSX.utils.aoa_to_sheet(rowsT1), "Tabel1_Data_Teknis");
+
+  const rowsT3 = [
+    ["PARAMETER GEOTEKNIK MATERIAL BENDUNGAN 1 TUJUH BUKIT"],
+    ["Zona / Lapisan", "Berat Isi (kN/m³)", "Kohesi c' (kN/m²)", "Sudut Geser phi' (°)", "Permeabilitas k (m/s)"],
+    ["Zona A (Core Kedap Air)", 17.35, 15.00, 23.00, "1.00E-08"],
+    ["Zona C (Shell Stabilitas)", 17.35, 31.00, 26.79, "1.60E-07"],
+    ["Fondasi 1: Colluvial Clay", 18.00, 15.00, 23.00, "1.00E-08"],
+    ["Fondasi 2: Weathered Diorit", 19.00, 30.00, 25.00, "3.00E-08"],
+    ["Fondasi 3: Fresh Diorit", 20.00, 50.00, 26.00, "1.00E-07"]
+  ];
+  XLSX.utils.book_append_sheet(wb, XLSX.utils.aoa_to_sheet(rowsT3), "Tabel3_Parameter_Tanah");
+
+  const rowsSF = [
+    ["HASIL ANALISIS STABILITAS LERENG (GEOSTUDIO SLOPE/W)"],
+    ["Skenario", "Sisi Lereng", "Muka Air (m)", "Kondisi / Y/h", "Koef. K", "SF Terhitung", "Syarat", "Evaluasi"],
+    ["Statik", "Hulu", 19.45, "Steady State", "-", 4.210, "SF > 1.50", "MEMENUHI (OK)"],
+    ["Statik", "Hulu", 19.45, "Rapid Drawdown", "-", 2.262, "SF > 1.30", "MEMENUHI (OK)"],
+    ["Statik", "Hilir", 19.45, "Steady State", "-", 1.959, "SF > 1.50", "MEMENUHI (OK)"],
+    ["Statik", "Hilir", 19.45, "Rapid Drawdown", "-", 1.969, "SF > 1.30", "MEMENUHI (OK)"],
+    ["Gempa OBE (0.19g)", "Hulu", 19.45, "Y/h = 0.25", 0.272, 3.308, "SF > 1.20", "MEMENUHI (OK)"],
+    ["Gempa OBE (0.19g)", "Hulu", 19.45, "Y/h = 0.50", 0.227, 2.754, "SF > 1.20", "MEMENUHI (OK)"],
+    ["Gempa OBE (0.19g)", "Hulu", 19.45, "Y/h = 0.75", 0.207, 2.406, "SF > 1.20", "MEMENUHI (OK)"],
+    ["Gempa OBE (0.19g)", "Hulu", 19.45, "Y/h = 1.00", 0.187, 1.749, "SF > 1.20", "MEMENUHI (OK)"],
+    ["Gempa OBE (0.19g)", "Hilir", 19.45, "Y/h = 0.25", 0.272, 3.134, "SF > 1.20", "MEMENUHI (OK)"],
+    ["Gempa OBE (0.19g)", "Hilir", 19.45, "Y/h = 0.50", 0.227, 2.225, "SF > 1.20", "MEMENUHI (OK)"],
+    ["Gempa OBE (0.19g)", "Hilir", 19.45, "Y/h = 0.75", 0.207, 1.753, "SF > 1.20", "MEMENUHI (OK)"],
+    ["Gempa OBE (0.19g)", "Hilir", 19.45, "Y/h = 1.00", 0.187, 1.239, "SF > 1.20", "MEMENUHI (OK)"],
+    ["Gempa MDE (0.52g)", "Hulu", 19.45, "Y/h = 0.25", 0.583, 1.971, "SF > 1.00", "MEMENUHI (OK)"],
+    ["Gempa MDE (0.52g)", "Hulu", 19.45, "Y/h = 0.50", 0.486, 1.682, "SF > 1.00", "MEMENUHI (OK)"],
+    ["Gempa MDE (0.52g)", "Hulu", 19.45, "Y/h = 0.75", 0.443, 1.490, "SF > 1.00", "MEMENUHI (OK)"],
+    ["Gempa MDE (0.52g)", "Hulu", 19.45, "Y/h = 1.00", 0.400, 1.103, "SF > 1.00", "MEMENUHI (OK)"],
+    ["Gempa MDE (0.52g)", "Hilir", 19.45, "Y/h = 0.25", 0.583, 1.917, "SF > 1.00", "MEMENUHI (OK)"],
+    ["Gempa MDE (0.52g)", "Hilir", 19.45, "Y/h = 0.50", 0.486, 1.484, "SF > 1.00", "MEMENUHI (OK)"],
+    ["Gempa MDE (0.52g)", "Hilir", 19.45, "Y/h = 0.75", 0.443, 1.219, "SF > 1.00", "MEMENUHI (OK)"],
+    ["Gempa MDE (0.52g)", "Hilir", 19.45, "Y/h = 1.00", 0.400, 0.889, "SF > 1.00", "Cek Deformasi: 5cm < 200cm (OK)"]
+  ];
+  XLSX.utils.book_append_sheet(wb, XLSX.utils.aoa_to_sheet(rowsSF), "Tabel5_6_7_Stabilitas");
+
+  const rowsSeep = [
+    ["ANALISIS KEAMANAN REMBESAN (SEEP/W ELEMEN HINGGA)"],
+    ["Pemeriksaan", "Formulasi", "Parameter Terukur", "Hasil SF", "Syarat Minimum", "Evaluasi"],
+    ["Tekanan Angkat (Uplift)", "SF = (gamma_n * t) / (gamma_w * h)", "gamma_n=18, t=1.7193m, h=2.0m", 1.547, "SF >= 1.50", "MEMENUHI (OK)"],
+    ["Piping Zona A", "ic = (Gs-1)/(1+e), SF = ic/ie", "Gs=2.586, e=0.50, ie=0.25", 4.23, "SF >= 3.00", "MEMENUHI (OK)"],
+    ["Piping Kaki Hilir", "ic = (Gs-1)/(1+e), SF = ic/ie", "Gs=2.635, e=0.777, ie=0.30", 3.07, "SF >= 3.00", "MEMENUHI (OK)"]
+  ];
+  XLSX.utils.book_append_sheet(wb, XLSX.utils.aoa_to_sheet(rowsSeep), "Rembesan_Uplift_Piping");
+
+  XLSX.writeFile(wb, "Analisis_Stabilitas_Bendungan1_Tujuh_Bukit.xlsx");
+  showToast("Laporan Stabilitas Bendungan 1 diekspor ke Excel (.xlsx)", "success");
+}
+
+function exportDam1StabilityWord() {
+  const content = `
+    <html xmlns:o='urn:schemas-microsoft-com:office:office' xmlns:w='urn:schemas-microsoft-com:office:word' xmlns='http://www.w3.org/TR/REC-html40'>
+    <head><meta charset="utf-8"><title>Laporan Stabilitas Bendungan 1 Tujuh Bukit</title>
+    <style>
+      body { font-family: Calibri, Arial, sans-serif; font-size: 11pt; color: #1e293b; line-height: 1.4; padding: 25px; }
+      h2 { color: #0284c7; text-align: center; margin-bottom: 2px; }
+      h3 { text-align: center; color: #b45309; margin-top: 0; }
+      table { width: 100%; border-collapse: collapse; margin-bottom: 15px; }
+      th, td { border: 1px solid #94a3b8; padding: 6px 8px; font-size: 10pt; }
+      th { background-color: #0f172a; color: #f8fafc; font-weight: bold; }
+    </style></head><body>
+      <h2>PT BUMI SUKSESINDO &bull; MERDEKA COPPER GOLD</h2>
+      <h3>LAPORAN ANALISIS STABILITAS LERENG &amp; REMBESAN BENDUNGAN 1 TUJUH BUKIT</h3>
+      <p style="text-align: center; font-size: 10pt;">Kecamatan Pesanggaran, Kabupaten Banyuwangi, Jawa Timur</p>
+      <hr/>
+      <h4>1. Ringkasan Parameter Teknis Bendungan 1</h4>
+      <p>Elevasi Puncak: +20.5 m | Elevasi Dasar: +9.0 m | Tinggi Maksimum: 11.5 m | Lebar Mercu: 10.0 m | Bentang: 400.0 m | Kemiringan Lereng Hulu &amp; Hilir: 1:3.</p>
+      
+      <h4>2. Hasil Analisis Stabilitas Lereng (Geostudio SLOPE/W)</h4>
+      <table>
+        <tr><th>Kondisi Pembebanan</th><th>Sisi Lereng</th><th>SF Terhitung</th><th>Syarat Minimum</th><th>Evaluasi</th></tr>
+        <tr><td>Statik Steady State (Hu=19.45m)</td><td>Hulu</td><td>4.210</td><td>SF &gt; 1.50</td><td>MEMENUHI (OK)</td></tr>
+        <tr><td>Statik Steady State (Hu=19.45m)</td><td>Hilir</td><td>1.959</td><td>SF &gt; 1.50</td><td>MEMENUHI (OK)</td></tr>
+        <tr><td>Rapid Drawdown</td><td>Hulu</td><td>2.262</td><td>SF &gt; 1.30</td><td>MEMENUHI (OK)</td></tr>
+        <tr><td>Gempa OBE (PGA 0.19g)</td><td>Hilir (Y/h=1.00)</td><td>1.239</td><td>SF &gt; 1.20</td><td>MEMENUHI (OK)</td></tr>
+        <tr><td>Gempa MDE (PGA 0.52g)</td><td>Hilir (Y/h=1.00)</td><td>0.889</td><td>SF &gt; 1.00</td><td>Cek Deformasi: 5 cm &lt; 200 cm (OK)</td></tr>
+      </table>
+
+      <h4>3. Analisis Keamanan Rembesan (SEEP/W)</h4>
+      <p><b>Tekanan Angkat (Uplift):</b> SF = 1.547 &ge; 1.50 (Aman).<br/>
+      <b>Erosi Buluh (Piping &amp; Boiling):</b> Zona A SF = 4.23 &ge; 3.00; Kaki Hilir SF = 3.07 &ge; 3.00 (Aman).</p>
+
+      <h4>4. Kesimpulan Rekayasa</h4>
+      <p>Berdasarkan evaluasi metode Spencer dan Makdisi-Seed, struktur Bendungan 1 Tujuh Bukit stabil dan aman dalam seluruh kondisi yang ditinjau. Tidak diperlukan modifikasi desain lereng ataupun penambahan material counterweight.</p>
+    </body></html>
+  `;
+  const blob = new Blob(['﻿', content], { type: 'application/msword' });
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement('a');
+  a.href = url;
+  a.download = "Laporan_Stabilitas_Bendungan1_Tujuh_Bukit.doc";
+  a.click();
+  showToast("Laporan Stabilitas diekspor ke Word (.doc)", "success");
+}
+
+function exportDam1StabilityPDF() {
+  if (!window.jspdf || !window.jspdf.jsPDF) { showToast('Library PDF belum siap', 'error'); return; }
+  const { jsPDF } = window.jspdf;
+  const doc = new jsPDF('p', 'mm', 'a4');
+
+  doc.setFillColor(15, 23, 42);
+  doc.rect(0, 0, 210, 26, 'F');
+  doc.setTextColor(6, 182, 212);
+  doc.setFontSize(12);
+  doc.setFont('helvetica', 'bold');
+  doc.text("PT BUMI SUKSESINDO - TUJUH BUKIT BANYUWANGI", 14, 10);
+  doc.setFontSize(8);
+  doc.setTextColor(255, 255, 255);
+  doc.setFont('helvetica', 'normal');
+  doc.text("Laporan Evaluasi Stabilitas Lereng & Keamanan Rembesan Bendungan 1", 14, 16);
+  doc.text("Metode: Spencer LEM (SLOPE/W), Makdisi-Seed, & SEEP/W • Standar Pd T-14-2004-A", 14, 21);
+
+  const bodyData = [
+    ["1", "Statik Steady State Hulu", "Spencer LEM", "4.210", "SF > 1.50", "MEMENUHI (OK)"],
+    ["2", "Statik Steady State Hilir", "Spencer LEM", "1.959", "SF > 1.50", "MEMENUHI (OK)"],
+    ["3", "Rapid Drawdown Hulu", "Spencer LEM", "2.262", "SF > 1.30", "MEMENUHI (OK)"],
+    ["4", "Rapid Drawdown Hilir", "Spencer LEM", "1.969", "SF > 1.30", "MEMENUHI (OK)"],
+    ["5", "Gempa OBE (0.19g) Hilir", "Pseudostatik K=0.187", "1.239", "SF > 1.20", "MEMENUHI (OK)"],
+    ["6", "Gempa MDE (0.52g) Hilir", "Pseudostatik K=0.400", "0.889", "SF > 1.00", "CEK DEFORMASI"],
+    ["7", "Deformasi Makdisi-Seed", "Perpindahan Tetap", "5.0 cm", "< 200 cm (0.5 Jagaan)", "MEMENUHI (OK)"],
+    ["8", "Tekanan Angkat (Uplift)", "gamma_n*t / gamma_w*h", "1.547", "SF >= 1.50", "MEMENUHI (OK)"],
+    ["9", "Piping / Boiling Zona A", "ic / ie", "4.23", "SF >= 3.00", "MEMENUHI (OK)"],
+    ["10", "Piping / Boiling Kaki Hilir", "ic / ie", "3.07", "SF >= 3.00", "MEMENUHI (OK)"]
+  ];
+
+  doc.autoTable({
+    startY: 30,
+    head: [['No', 'Kondisi Pengujian', 'Metode Evaluasi', 'Nilai Terhitung', 'Kriteria Standar', 'Status']],
+    body: bodyData,
+    theme: 'striped',
+    headStyles: { fillColor: [6, 182, 212], textColor: [0, 0, 0] },
+    styles: { fontSize: 8 }
+  });
+
+  const finalY = doc.lastAutoTable.finalY + 15;
+  doc.setTextColor(0, 0, 0);
+  doc.setFontSize(8);
+  doc.text("Disetujui oleh Tim Ahli Geoteknik,", 20, finalY);
+  doc.text("Ir. Mohamad Hartadi", 20, finalY + 16);
+  doc.setFontSize(7);
+  doc.setTextColor(100, 100, 100);
+  doc.text("Lead Geotechnical & Dam Safety Specialist", 20, finalY + 20);
+
+  doc.setFontSize(8);
+  doc.setTextColor(0, 0, 0);
+  doc.text("Mengetahui: Kepala Teknik Tambang,", 120, finalY);
+  doc.text("Roelly Fransiscus", 120, finalY + 16);
+  doc.setFontSize(7);
+  doc.setTextColor(100, 100, 100);
+  doc.text("KTT PT Bumi Suksesindo", 120, finalY + 20);
+
+  doc.save("Laporan_Stabilitas_Bendungan1_Tujuh_Bukit.pdf");
+  showToast("Laporan PDF Stabilitas Bendungan 1 berhasil diunduh", "success");
+}
+
+
+window.addEventListener('DOMContentLoaded', () => {
     try { initLoadingRealisticEarth(); } catch(e) {}
     try { initBackgroundRealisticEarth(); } catch(e) {}
     try { initLiveClock(); } catch(e) {}
